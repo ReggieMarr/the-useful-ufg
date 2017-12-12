@@ -17,6 +17,7 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
 {
     ui->setupUi(this);
 
+
     ui->targetmodeLabel->setVisible(false);
     trainingModeReceived = trainingMode;
     if(trainingMode)

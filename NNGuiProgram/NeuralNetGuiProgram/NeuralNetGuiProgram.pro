@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = NeuralNetGuiProgram
 TEMPLATE = app
 
-#CONFIG += extserialport
+CONFIG += extserialport
 
 
 SOURCES += main.cpp\
@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     mysqlcustomquerywindow.cpp \
     mysqlsetupwindow.cpp \
     startupwindow.cpp \
-    onlinenn.cpp
+    onlinenn.cpp \
+    modbussetupwindow.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -38,12 +39,14 @@ HEADERS  += nnconfigwindow.h \
     mysqlsetupwindow.h \
     startupwindow.h \
     onlinenn.h \
-    imodbus.h
+    imodbus.h \
+    modbussetupwindow.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
     mysqlsetupwindow.ui \
-    startupwindow.ui
+    startupwindow.ui \
+    modbussetupwindow.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \

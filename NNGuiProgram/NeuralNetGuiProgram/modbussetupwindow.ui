@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>modbusSetupWindow</class>
+ <widget class="QMainWindow" name="modbusSetupWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>733</width>
+    <height>271</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="horizontalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>641</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="portLabel">
+       <property name="text">
+        <string>Serial Port</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="baudLabel">
+       <property name="text">
+        <string>Baud Rate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="dataBitsLabel">
+       <property name="text">
+        <string>Data Bits</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="stopBitsLabel">
+       <property name="text">
+        <string>Stop Bits</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="parityLabel">
+       <property name="text">
+        <string>Parity</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>100</y>
+      <width>641</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QComboBox" name="serialPort"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="baud"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="dataBits"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="stopBits"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="parity"/>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="setupConnectionBtn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>170</y>
+      <width>121</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Test Connection</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>733</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
