@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = NeuralNetGuiProgram
 TEMPLATE = app
 
+#CONFIG += extserialport
+
 
 SOURCES += main.cpp\
         nnconfigwindow.cpp \

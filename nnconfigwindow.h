@@ -88,13 +88,11 @@ private slots:
 
     void on_mySQLTargetSelect_clicked(bool checked);
 
-    void on_offlineSelect_clicked(bool checked);
-
-    void on_OPCSelect_clicked(bool checked);
-
     void on_commandLinkButton_clicked();
 
     void on_SelectTarget_clicked();
+
+    void on_targetSelectBox_currentIndexChanged(int index);
 
 private:
 
@@ -108,7 +106,7 @@ private:
     bool mySQLMode = false;
     int OutputCount;
     int InputCount;
-    bool modbusMode;
+    int runType;
     mySQLCustomQueryWindow *queryWindow;
     mySQlSetupWindow *setupmySQLSetupWindow;
     int activationFunctionType;

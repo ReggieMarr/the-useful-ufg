@@ -21,10 +21,8 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
     trainingModeReceived = trainingMode;
     if(trainingMode)
     {
-        ui->mySQLTargetSelect->setVisible(false);
-        ui->offlineSelect->setVisible(false);
+        ui->targetSelectBox->setVisible(false);
         ui->SelectTarget->setVisible(false);
-        ui->OPCSelect->setVisible(false);
 
         ui->StartNNButton->setEnabled(false);
 
@@ -68,6 +66,12 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
     }
     else
     {
+        ui->targetSelectBox->setVisible(true);
+        ui->targetSelectBox->addItem("Offline Data");
+        ui->targetSelectBox->addItem("Modbus TCP Conn");
+        ui->targetSelectBox->addItem("Modbus RTU Conn");
+
+        runType = -1;
         // create graph and assign data to it:
         ui->NNPlotWidget->addGraph();
         // give the axes some labels:
@@ -77,11 +81,7 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
         ui->NNPlotWidget->xAxis->setRange(0, 2001);
         ui->NNPlotWidget->yAxis->setRange(-1, 1);
         ui->NNPlotWidget->replot();
-
-        ui->mySQLTargetSelect->setVisible(true);
-        ui->offlineSelect->setVisible(true);
         ui->SelectTarget->setVisible(true);
-        ui->OPCSelect->setVisible(true);
 
         ui->saveBiasesandWeights->setVisible(false);
         ui->pushButton->setVisible(false);
@@ -186,7 +186,7 @@ void NNConfigWindow::SendExecuteCommand(void)
                 NNControlObj.RunNN(NNOutput,activationFunctionType,jsonChosenModel,
                                    manualInput1,manualInput2,manualMode);
             }
-            else if(modbusMode)
+            else if(runType ==1 || runType == 2)
             {
                 NNControlObj.RunNN(NNOutput,activationFunctionType,jsonChosenModel,
                                    manualInput1,manualInput2,false);
@@ -662,7 +662,7 @@ void NNConfigWindow::on_mySQLTargetSelect_clicked(bool checked)
 {
     if(checked)
     {
-        if(!modbusMode)
+        if(runType == 0)
         {
             manualMode = true;
         }
@@ -679,15 +679,6 @@ void NNConfigWindow::on_mySQLTargetSelect_clicked(bool checked)
 
 }
 
-void NNConfigWindow::on_offlineSelect_clicked(bool checked)
-{
-
-}
-
-void NNConfigWindow::on_OPCSelect_clicked(bool checked)
-{
-    modbusMode = true;
-}
 
 void NNConfigWindow::on_commandLinkButton_clicked()
 {
@@ -699,13 +690,22 @@ void NNConfigWindow::on_commandLinkButton_clicked()
 
 void NNConfigWindow::on_SelectTarget_clicked()
 {
-    filename = QFileDialog::getOpenFileName(
-                this,
-                tr("Select Data File"),
-                "/",
-                "Text Files (*.txt);;All Files (*.*)"
-                ).toStdString();
+    if(runType == 0)
+    {
+        filename = QFileDialog::getOpenFileName(
+                    this,
+                    tr("Select Data File"),
+                    "/",
+                    "Text Files (*.txt);;All Files (*.*)"
+                    ).toStdString();
 
-    ui->StartNNButton->setVisible(true);
+        ui->StartNNButton->setVisible(true);
+    }
 }
 
+
+
+void NNConfigWindow::on_targetSelectBox_currentIndexChanged(int index)
+{
+    runType = index;
+}
