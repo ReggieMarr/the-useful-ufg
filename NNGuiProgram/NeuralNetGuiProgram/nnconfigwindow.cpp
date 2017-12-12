@@ -322,6 +322,7 @@ void NNConfigWindow::SendExecuteCommand(void)
 
 void NNConfigWindow::on_StartNNButton_clicked()
 {
+    cout << "Start NN \n";
     SendExecuteCommand();
 }
 
@@ -680,7 +681,6 @@ void NNConfigWindow::on_mySQLTargetSelect_clicked(bool checked)
 
 }
 
-
 void NNConfigWindow::on_commandLinkButton_clicked()
 {
     StartupWindow *mainMenu;
@@ -702,6 +702,13 @@ void NNConfigWindow::on_SelectTarget_clicked()
 
         ui->StartNNButton->setVisible(true);
     }
+    else
+    {
+        modbusConfigWindow = new modbusSetupWindow(this,modbusTargetConfig);
+
+        modbusConfigWindow->show();
+    }
+    ui->StartNNButton->setVisible(true);
 }
 
 

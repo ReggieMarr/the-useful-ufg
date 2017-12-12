@@ -8,6 +8,7 @@
 #include "neuron.h"
 #include "customnn.h"
 #include "json.hpp"
+#include "modbussetupwindow.h"
 
 
 using json = nlohmann::json;
@@ -22,14 +23,6 @@ struct NNModel {
     string ActivationFunction;
     vector<unsigned> Topology;
 };
-
-//struct setupConfiguration
-//{
-//char *serverIP; //192.168.2.156
-//char *user; //root
-//char *password; //6AS3Project
-//char *database; //stillas3_project
-//};
 
 typedef vector<vector<vector<float>>> runtimeModel;
 
@@ -50,6 +43,7 @@ public:
     int chosenActivation;
     bool mySQLIsValid = false;
     setupConfiguration mySQLConfig;
+    modbusConfig modbusTargetConfig;
 
     ~NNConfigWindow();
 
@@ -109,6 +103,7 @@ private:
     int runType;
     mySQLCustomQueryWindow *queryWindow;
     mySQlSetupWindow *setupmySQLSetupWindow;
+    modbusSetupWindow *modbusConfigWindow;
     int activationFunctionType;
     float errorSmoothingRange;
 
