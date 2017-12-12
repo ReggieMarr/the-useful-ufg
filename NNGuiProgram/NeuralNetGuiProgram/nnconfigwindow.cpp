@@ -704,7 +704,7 @@ void NNConfigWindow::on_SelectTarget_clicked()
     }
     else
     {
-        modbusConfigWindow = new modbusSetupWindow(this,modbusTargetConfig);
+        modbusConfigWindow = new modbusSetupWindow(this,&modbusTargetConfig,runType);
 
         modbusConfigWindow->show();
     }
