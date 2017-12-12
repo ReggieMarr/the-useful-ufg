@@ -116,8 +116,8 @@ void modbusSetupWindow::on_setupConnectionBtn_clicked()
     //apparently this is how to parse QString to char * and int
     QString tempQString = ui->serialPort->currentText();
     QByteArray tempByteArray = tempQString.toLatin1();
-    userConfig.serialPort = tempByteArray.data();
-    userConfig.baud = ui->baud->currentText().toInt();
+    userConfig.serialPortOrIPAddress = tempByteArray.data();
+    userConfig.baudOrTCPPort = ui->baud->currentText().toInt();
     userConfig.dataBits = ui->dataBits->currentText().toInt();
     userConfig.stopBits = ui->stopBits->currentText().toFloat();
     tempQString = ui->parity->currentText();

@@ -43,7 +43,9 @@ public:
     int chosenActivation;
     bool mySQLIsValid = false;
     setupConfiguration mySQLConfig;
+
     modbusConfig modbusTargetConfig;
+
 
     ~NNConfigWindow();
 
