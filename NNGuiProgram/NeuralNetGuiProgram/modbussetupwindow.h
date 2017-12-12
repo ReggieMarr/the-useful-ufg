@@ -5,11 +5,13 @@
 
 typedef struct modbusConfig
 {
-    char *serialPortOrIPAddress;
+    //char *serialPortOrIPAddress;
+    QString serialPortOrIPAddress;
     int baudOrTCPPort;
     int dataBits;
     float stopBits;
-    char *parity;
+    //char *parity;
+    QString parity;
 } modbusConfig;
 
 namespace Ui {
@@ -22,7 +24,7 @@ class modbusSetupWindow : public QMainWindow
 
 public:
 
-    modbusConfig *userConfig = new(modbusConfig);// = {"/dev/ttyS0",9600,8,1.5,"Odd"};
+    modbusConfig *userConfig;// = new(modbusConfig);// = {"/dev/ttyS0",9600,8,1.5,"Odd"};
 
     explicit modbusSetupWindow(QWidget *parent = 0);
     explicit modbusSetupWindow(QWidget *parent,modbusConfig *modbusConnConfig,int connType);

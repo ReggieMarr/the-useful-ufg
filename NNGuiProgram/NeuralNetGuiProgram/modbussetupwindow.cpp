@@ -9,6 +9,7 @@ modbusSetupWindow::modbusSetupWindow(QWidget *parent) :
     ui(new Ui::modbusSetupWindow)
 {
     QSettings s;
+    //userConfig = modbusConnConfig;
     //userConfig = {"/dev/ttyS0",9600,8,1.5,"Odd"};
 
     ui->setupUi(this);
@@ -57,6 +58,8 @@ modbusSetupWindow::modbusSetupWindow(QWidget *parent, modbusConfig *modbusConnCo
     QMainWindow(parent),
     ui(new Ui::modbusSetupWindow)
 {
+    userConfig = modbusConnConfig;
+
     //this is just to compensate for not having a default
     parent = 0;
 
@@ -154,15 +157,15 @@ modbusSetupWindow::~modbusSetupWindow()
 void modbusSetupWindow::on_setupConnectionBtn_clicked()
 {
     //this is how to parse QString to char * and int
-    QString tempQString = ui->serialPort->currentText();
-    QByteArray tempByteArray = tempQString.toLatin1();
-    userConfig->serialPortOrIPAddress = tempByteArray.data();
+    //QString tempQString = ui->serialPort->currentText();
+    //QByteArray tempByteArray = tempQString.toLatin1();
+    userConfig->serialPortOrIPAddress = ui->serialPort->currentText();//tempByteArray.data();
     userConfig->baudOrTCPPort = ui->baud->currentText().toInt();
     userConfig->dataBits = ui->dataBits->currentText().toInt();
     userConfig->stopBits = ui->stopBits->currentText().toFloat();
-    tempQString = ui->parity->currentText();
-    tempByteArray = tempQString.toLatin1();
-    userConfig->parity = tempByteArray.data();
+    //tempQString = ui->parity->currentText();
+    //tempByteArray = tempQString.toLatin1();
+    userConfig->parity = ui->parity->currentText();//tempByteArray.data();
 }
 
 void modbusSetupWindow::settext(const QString &t)
