@@ -76,8 +76,10 @@ void CustomNN::Feedforward(const vector<double> &InputVals, int activationFuncti
 }
 
 
-
-void CustomNN::BackPropogation(const vector<double> &TargetVals, double learnToEta, double momentumToAlpha, double memoryRangeToSmoothingFactor, int activationFunctionType)
+//this is to be more system modelling
+void CustomNN::BackPropogation(const vector<double> &TargetVals, double learnToEta,
+                               double momentumToAlpha, double memoryRangeToSmoothingFactor,
+                               int activationFunctionType)
 {
     /* Calculate overal net error (Root Mean Square Error)
        n is meant to represent currentneuron in this scope
@@ -103,6 +105,57 @@ void CustomNN::BackPropogation(const vector<double> &TargetVals, double learnToE
             (m_recentAverageError * m_recentAverageSmoothingFactor + m_error)
             / (m_recentAverageSmoothingFactor + 1.0);
 
+    //Calculate output layer gradients
+    for (unsigned n = 0; n < OutputLayer.size()-1;n++)
+    {
+     //recall that the neuron class has to do the nitty gritty math
+     OutputLayer[n].calcOutputGradients(TargetVals[n],activationFunctionType);
+    }
+    //Calculate gradients on hidden layers
+    for (unsigned layerNum = m_layers.size() - 2; layerNum > 0; layerNum--)
+    {
+        Layer &hiddenLayer = m_layers[layerNum];
+        Layer &nextLayer = m_layers[layerNum+1];
+
+        for (unsigned n = 0;n < hiddenLayer.size();n++)
+        {
+            hiddenLayer[n].calcHiddenGradients(nextLayer,activationFunctionType);
+        }
+    }
+    //For all layer from outputs to first hidden layer
+    //update connection weights
+
+    for (unsigned layerNum = m_layers.size() - 1;layerNum > 0; layerNum--)
+    {
+        Layer &CurrentLayer = m_layers[layerNum];
+        Layer &prevLayer = m_layers[layerNum -1];
+
+        for (unsigned n = 0;n<CurrentLayer.size() - 1; n++)
+        {
+            CurrentLayer[n].updateWeights(prevLayer,learnToEta,momentumToAlpha);
+        }
+    }
+}
+
+//This is to be used for efficiency training
+void CustomNN::BackPropogation(const vector<double> &TargetVals, double learnToEta,
+                               double momentumToAlpha, double memoryRangeToSmoothingFactor,
+                               int activationFunctionType,const vector<int> Outputs,const vector<int> Inputs)
+{
+    /* Calculate overal net error (Root Mean Square Error)
+       n is meant to represent currentneuron in this scope
+    */
+
+    Layer &OutputLayer = m_layers.back();
+
+    double sumInverseEfficiency = 0.0;
+
+    for (uint cycleMatches = 0;cycleMatches < Outputs.size();cycleMatches++)
+    {
+        sumInverseEfficiency += Inputs.at(cycleMatches) / Outputs.at(cycleMatches);
+    }
+
+    m_recentAverageError = sumInverseEfficiency;
     //Calculate output layer gradients
     for (unsigned n = 0; n < OutputLayer.size()-1;n++)
     {

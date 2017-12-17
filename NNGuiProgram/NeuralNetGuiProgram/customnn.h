@@ -20,7 +20,11 @@ public:
     CustomNN(const vector<unsigned> &Topology,runtimeModel optimalModel);
     //since Feedforward just passes vals to neurons we can use const here
     void Feedforward(const vector<double> &InputVals,int activationFunctionType);
-    void BackPropogation(const vector<double> &TargetVals, double learnToEta, double momentumToAlpha, double memoryRangeToSmoothingFactor,int activationFunctionType);
+    void BackPropogation(const vector<double> &TargetVals, double learnToEta, double momentumToAlpha,
+                         double memoryRangeToSmoothingFactor,int activationFunctionType);
+    void BackPropogation(const vector<double> &TargetVals, double learnToEta,
+                                   double momentumToAlpha, double memoryRangeToSmoothingFactor,
+                                   int activationFunctionType,const vector<int> Outputs,const vector<int> Inputs);
     //since GetResults doesnt actually do anything and just reads
     //the results and spits them back so it is a const function
     //note that the const is not neccessary

@@ -8,11 +8,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    QApplication::setOrganizationName( "EDC Electronic Design Chemnitz GmbH" );
-    QApplication::setOrganizationDomain( "ed-chemnitz.de" );
-    QApplication::setApplicationName( "QModBus" );
-
+//    QApplication::setOrganizationName( "EDC Electronic Design Chemnitz GmbH" );
+//    QApplication::setOrganizationDomain( "ed-chemnitz.de" );
+//    QApplication::setApplicationName( "QModBus" );
 
     //NNConfigWindow w;
     StartupWindow w;

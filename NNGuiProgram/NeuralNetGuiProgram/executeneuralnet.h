@@ -41,10 +41,10 @@ public:
                  int manualVal1, int manualVal2, bool manualMode);
 
     void RunNNModbusOffline(vector<vector<double> > &NNOutput,int selectedFunction,
-                            runtimeModel receivedModel,int modbusPortNum,string IPAddress);
+                            runtimeModel receivedModel,int modbusPortNum,QString IPAddress);
 
     void RunNNModbusOnline(vector<vector<double> > &NNOutput, int selectedFunction,
-                            runtimeModel receivedModel,bool stopCondition,int modbusPortNum,char *IPAddress);
+                            runtimeModel receivedModel, bool stopCondition, int modbusPortNum, QString IPAddress);
 
     ExecuteNeuralNet();
 

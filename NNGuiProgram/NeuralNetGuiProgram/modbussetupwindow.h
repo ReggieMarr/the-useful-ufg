@@ -48,9 +48,14 @@ private slots:
 
     void on_editIPAdd4_textChanged(const QString &arg1);
 
+    void on_editPort_textChanged(const QString &arg1);
+
 private:
     Ui::modbusSetupWindow *ui;
     int portIndex;
+    int modbusEthernetMode;
+    QString inputIP;
+    QString inputPort;
 };
 
 #endif // MODBUSSETUPWINDOW_H

@@ -3,6 +3,11 @@
 //#include "qextserialport.h"
 #include "qextserialenumerator.h"
 #include "QSettings"
+#include "exception"
+#include "iostream"
+#include "modbus/modbus.h"
+#include "modbus/modbus-tcp.h"
+#include "modbus/modbus-version.h"
 
 modbusSetupWindow::modbusSetupWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -64,6 +69,7 @@ modbusSetupWindow::modbusSetupWindow(QWidget *parent, modbusConfig *modbusConnCo
     parent = 0;
 
 
+
     userConfig->serialPortOrIPAddress = "/dev/ttyS0";
     userConfig->baudOrTCPPort = 9600;
     userConfig->dataBits = 8;
@@ -78,6 +84,7 @@ modbusSetupWindow::modbusSetupWindow(QWidget *parent, modbusConfig *modbusConnCo
 
     if(connType > 1)
     {
+        modbusEthernetMode = false;
         ui->serialPort->disconnect();
         ui->serialPort->clear();
 
@@ -126,6 +133,9 @@ modbusSetupWindow::modbusSetupWindow(QWidget *parent, modbusConfig *modbusConnCo
     }
     else
     {
+        ui->setupConnectionBtn->setVisible(false);
+        modbusEthernetMode = true;
+
         ui->editIPClassifier->setVisible(true);
         ui->editIPAdd2->setVisible(true);
         ui->editIPAdd3->setVisible(true);
@@ -154,18 +164,71 @@ modbusSetupWindow::~modbusSetupWindow()
     delete ui;
 }
 
+void TCPConnTry(char * IP,int portNum)
+{
+    uint8_t dest[1024];
+    uint16_t * dest16 = (uint16_t *) dest;
+
+    modbus_t * m_modbus = modbus_new_tcp(IP, portNum);
+    modbus_connect(m_modbus);
+
+    memset( dest, 0, 1024 );
+
+    modbus_set_slave( m_modbus, 1 );
+}
+
 void modbusSetupWindow::on_setupConnectionBtn_clicked()
 {
     //this is how to parse QString to char * and int
-    //QString tempQString = ui->serialPort->currentText();
-    //QByteArray tempByteArray = tempQString.toLatin1();
-    userConfig->serialPortOrIPAddress = ui->serialPort->currentText();//tempByteArray.data();
-    userConfig->baudOrTCPPort = ui->baud->currentText().toInt();
+    //this is no longer neccesary here, at least for now
+    //as the userConfig stores QStrings rather than char *
+    //but this must be changed when actually making the modbus connection
+    QString tempQString = ui->serialPort->currentText();
+    QByteArray tempByteArray = tempQString.toLatin1();
+
+
+    userConfig->serialPortOrIPAddress = inputIP;//ui->serialPort->currentText();//tempByteArray.data();
+    userConfig->baudOrTCPPort = inputPort.toInt(nullptr,10);//ui->baud->currentText().toInt();
     userConfig->dataBits = ui->dataBits->currentText().toInt();
     userConfig->stopBits = ui->stopBits->currentText().toFloat();
     //tempQString = ui->parity->currentText();
     //tempByteArray = tempQString.toLatin1();
     userConfig->parity = ui->parity->currentText();//tempByteArray.data();
+
+
+    if(modbusEthernetMode)
+    {
+        uint8_t dest[1024];
+        uint16_t * dest16 = (uint16_t *) dest;
+
+        tempQString = userConfig->serialPortOrIPAddress;//ui->parity->currentText();
+        tempByteArray = tempQString.toLatin1();
+        char * IPAddress = tempByteArray.data();//"192.168.2.80";
+        int modbusPortNum = userConfig->baudOrTCPPort;//502;
+
+        try
+        {
+            //throw TCPConnTry(IPAddress,modbusPortNum);
+            modbus_t * m_modbus = modbus_new_tcp(IPAddress, modbusPortNum);
+            modbus_connect(m_modbus);
+
+            memset( dest, 0, 1024 );
+
+            modbus_set_slave( m_modbus, 1 );
+        }
+        catch(std::exception& e)
+        {
+            std::cout << "Exception found: " << e.what() << std::endl;
+        }
+
+
+
+    }
+    else
+    {
+
+    }
+
 }
 
 void modbusSetupWindow::settext(const QString &t)
@@ -217,6 +280,19 @@ void modbusSetupWindow::on_editIPAdd4_textChanged(const QString &arg1)
 {
     if (arg1.length() == 3) {
         ui->editPort->setFocus(Qt::OtherFocusReason);
+
     }
     emit textChanged(text());
+}
+
+void modbusSetupWindow::on_editPort_textChanged(const QString &arg1)
+{
+    if (arg1.length() > 2)
+    {
+        ui->setupConnectionBtn->setVisible(true);
+        inputPort = arg1;
+        inputIP = ui->editIPClassifier->text() + "." + ui->editIPAdd2->text()
+                + "." + ui->editIPAdd3->text() + "." + ui->editIPAdd4->text();
+
+    }
 }

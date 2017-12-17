@@ -187,8 +187,10 @@ void NNConfigWindow::SendExecuteCommand(void)
                 NNControlObj.RunNN(NNOutput,activationFunctionType,jsonChosenModel,
                                    manualInput1,manualInput2,manualMode);
             }
-            else if(runType ==1 || runType == 2)
+            else if(runType == 1)// || runType == 2)
             {
+                //NNControlObj.RunNNModbusOffline();
+
                 NNControlObj.RunNN(NNOutput,activationFunctionType,jsonChosenModel,
                                    manualInput1,manualInput2,false);
             }
@@ -710,8 +712,6 @@ void NNConfigWindow::on_SelectTarget_clicked()
     }
     ui->StartNNButton->setVisible(true);
 }
-
-
 
 void NNConfigWindow::on_targetSelectBox_currentIndexChanged(int index)
 {

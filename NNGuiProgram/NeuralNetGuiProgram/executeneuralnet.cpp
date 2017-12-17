@@ -502,7 +502,8 @@ void  ExecuteNeuralNet::RunNN(vector<vector<double> > &NNOutput,int selectedFunc
 
 
 void ExecuteNeuralNet::RunNNModbusOnline(vector<vector<double> > &NNOutput,int selectedFunction,
-                                          runtimeModel receivedModel,bool stopCondition,int modbusPortNum,char * IPAddress)
+                                         runtimeModel receivedModel,bool stopCondition,int modbusPortNum,
+                                         QString IPAddress)
 {
     vector<unsigned> topology;
 
@@ -522,10 +523,84 @@ void ExecuteNeuralNet::RunNNModbusOnline(vector<vector<double> > &NNOutput,int s
         uint8_t dest[1024];
         uint16_t * dest16 = (uint16_t *) dest;
 
-        IPAddress = "192.168.2.80";
-        modbusPortNum = 502;
+        QString tempQString = IPAddress;
+        QByteArray tempByteArray = tempQString.toLatin1();
+        char * ModbusIP = tempByteArray.data();//"192.168.2.80";
 
-        m_modbus = modbus_new_tcp(IPAddress, modbusPortNum);
+        m_modbus = modbus_new_tcp(ModbusIP, modbusPortNum);
+        modbus_connect(m_modbus);
+
+        memset( dest, 0, 1024 );
+
+        int ret = -1;
+        bool is16Bit = false;
+        modbus_set_slave( m_modbus, 1 );
+
+        ret = modbus_read_registers( m_modbus, 1, 5, dest16 );
+        is16Bit = true;
+
+        for(uint i = 0;i<6;i++)
+        {
+            inputVals.push_back(double(dest16[i]));
+            cout << "Register[" << i << "] = " << dest16[i] << endl;
+        }
+
+        myNet.Feedforward(inputVals,selectedFunction);
+        myNet.GetResults(currentResultVals);
+        NNOutput.push_back(currentResultVals);
+
+        uint8_t num = currentResultVals.size();
+
+        uint8_t * data = new uint8_t[num];
+        for( int i = 0; i < num; ++i )
+        {
+            data[i] = currentResultVals.at(i);
+        }
+
+        int addr = 0;
+
+        ret = modbus_write_bits( m_modbus, addr, num, data );
+        delete[] data;
+        currentResultVals.clear();
+
+        //myNet.BackPropogation(currentTargetVals,learningRate,momentum,memoryRange,selectedFunction);
+
+        //CurrentModel.clear();
+        //CurrentModel = myNet.m_layers;
+    }
+
+    modbus_close(m_modbus);
+    modbus_free(m_modbus);
+}
+
+void ExecuteNeuralNet::RunNNModbusOffline(vector<vector<double> > &NNOutput,int selectedFunction,
+                        runtimeModel receivedModel,int modbusPortNum,QString IPAddress)
+{
+    vector<unsigned> topology;
+
+    topology.push_back(3);
+    topology.push_back(6);
+    topology.push_back(5);
+    topology.push_back(4);
+    topology.push_back(2);
+    //this is what triggers the runmode
+    CustomNN myNet(topology,receivedModel);
+
+    NNOutput.clear();
+    vector<double> inputVals, currentTargetVals, currentResultVals;
+
+    bool stopCondition = true;
+
+    while (!stopCondition)
+    {
+        uint8_t dest[1024];
+        uint16_t * dest16 = (uint16_t *) dest;
+
+        QString tempQString = IPAddress;
+        QByteArray tempByteArray = tempQString.toLatin1();
+        char * ModbusIP = tempByteArray.data();//"192.168.2.80";
+
+        m_modbus = modbus_new_tcp(ModbusIP, modbusPortNum);
         modbus_connect(m_modbus);
 
         memset( dest, 0, 1024 );
