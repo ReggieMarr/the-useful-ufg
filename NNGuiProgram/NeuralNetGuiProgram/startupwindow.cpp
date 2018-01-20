@@ -28,7 +28,16 @@ void StartupWindow::on_selectButton_clicked()
 {
 
     this->close();
-    NeuralNetWindow = new NNConfigWindow(this,trainingMode);
-    NeuralNetWindow->show();
+    if(trainingMode)
+    {
+        NeuralNetWindow = new NNConfigWindow(this,trainingMode);
+        NeuralNetWindow->show();
+    }
+    else
+    {
+        onlineWindow = new runtime_Window(this);
+        onlineWindow->show();
+    }
+
 
 }

@@ -7,7 +7,11 @@
 #include "mysqlsetupwindow.h"
 #include "neuron.h"
 #include "customnn.h"
-#include "json.hpp"
+//currently using nlohmann json
+//version 3.0.0 as 2.0.6 is not supported by
+//ubuntu 17.10
+//#include "json.hpp"
+#include "src/json.hpp"
 #include "modbussetupwindow.h"
 
 

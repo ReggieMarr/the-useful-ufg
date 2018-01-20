@@ -1,6 +1,6 @@
 #include "modbussetupwindow.h"
 #include "ui_modbussetupwindow.h"
-//#include "qextserialport.h"
+#include "qextserialport.h"
 #include "qextserialenumerator.h"
 #include "QSettings"
 #include "exception"

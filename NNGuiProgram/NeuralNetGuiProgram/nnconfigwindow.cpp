@@ -16,6 +16,7 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
     ui(new Ui::NNConfigWindow)
 {
     ui->setupUi(this);
+    QWidget::showMaximized();
 
 
     ui->targetmodeLabel->setVisible(false);

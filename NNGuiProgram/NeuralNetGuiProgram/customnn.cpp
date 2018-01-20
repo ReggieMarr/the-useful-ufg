@@ -140,7 +140,7 @@ void CustomNN::BackPropogation(const vector<double> &TargetVals, double learnToE
 //This is to be used for efficiency training
 void CustomNN::BackPropogation(const vector<double> &TargetVals, double learnToEta,
                                double momentumToAlpha, double memoryRangeToSmoothingFactor,
-                               int activationFunctionType,const vector<int> Outputs,const vector<int> Inputs)
+                               int activationFunctionType,const vector<double> Outputs,const vector<double> Inputs)
 {
     /* Calculate overal net error (Root Mean Square Error)
        n is meant to represent currentneuron in this scope

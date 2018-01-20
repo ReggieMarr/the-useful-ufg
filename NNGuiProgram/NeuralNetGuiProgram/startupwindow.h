@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "nnconfigwindow.h"
+#include "runtime_window.h"
 
 namespace Ui {
 class StartupWindow;
@@ -27,6 +28,7 @@ private:
     Ui::StartupWindow *ui;
     bool trainingMode;
     NNConfigWindow* NeuralNetWindow;
+    runtime_Window* onlineWindow;
 };
 
 #endif // STARTUPWINDOW_H

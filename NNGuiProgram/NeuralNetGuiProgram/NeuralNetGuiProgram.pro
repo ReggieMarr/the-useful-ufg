@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     mysqlsetupwindow.cpp \
     startupwindow.cpp \
     onlinenn.cpp \
-    modbussetupwindow.cpp
+    modbussetupwindow.cpp \
+    runtime_window.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -40,13 +41,15 @@ HEADERS  += nnconfigwindow.h \
     startupwindow.h \
     onlinenn.h \
     imodbus.h \
-    modbussetupwindow.h
+    modbussetupwindow.h \
+    runtime_window.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
     mysqlsetupwindow.ui \
     startupwindow.ui \
-    modbussetupwindow.ui
+    modbussetupwindow.ui \
+    runtime_window.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \
@@ -54,9 +57,9 @@ FORMS    += nnconfigwindow.ui \
 
 INCLUDEPATH += "/usr/local/include/"
 
+INCLUDEPATH += "/home/reggie/Project_Apps/gitDownloads/nlohmann3.0.0/json"
+
 LIBS += -L/usr/local/lib -lmodbus
-
-
 
 #unix {
 #    SOURCES += 3rdparty/qextserialport/posix_qextserialport.cpp	\
