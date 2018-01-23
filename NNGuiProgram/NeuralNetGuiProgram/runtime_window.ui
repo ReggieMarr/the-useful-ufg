@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="supervisionTab">
        <attribute name="title">
@@ -403,7 +403,7 @@
             <widget class="QSpinBox" name="numberofCoilsSpin"/>
            </item>
            <item row="2" column="2">
-            <widget class="QCheckBox" name="checkBox_2">
+            <widget class="QCheckBox" name="hexDisplayChk">
              <property name="text">
               <string>Hex Display</string>
              </property>
@@ -457,6 +457,81 @@
        <attribute name="title">
         <string>Data Historian</string>
        </attribute>
+       <widget class="QTableView" name="historicalDataTableView">
+        <property name="geometry">
+         <rect>
+          <x>610</x>
+          <y>10</y>
+          <width>401</width>
+          <height>311</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="ConnectionWidget" name="connectionWidget">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>0</y>
+          <width>261</width>
+          <height>321</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>380</y>
+          <width>931</width>
+          <height>141</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>SQL Query</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QTextEdit" name="sqlEdit"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="clearButton">
+             <property name="text">
+              <string>Clear</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendQueryButton">
+             <property name="text">
+              <string>Submit</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -473,8 +548,92 @@
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="insertRowAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Insert Row</string>
+   </property>
+   <property name="statusTip">
+    <string>Inserts a new Row</string>
+   </property>
+  </action>
+  <action name="deleteRowAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Delete Row</string>
+   </property>
+   <property name="statusTip">
+    <string>Deletes the current Row</string>
+   </property>
+  </action>
+  <action name="fieldStrategyAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Submit on &amp;Field Change</string>
+   </property>
+   <property name="toolTip">
+    <string>Commit on Field Change</string>
+   </property>
+  </action>
+  <action name="rowStrategyAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Submit on &amp;Row Change</string>
+   </property>
+   <property name="toolTip">
+    <string>Commit on Row Change</string>
+   </property>
+  </action>
+  <action name="manualStrategyAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Submit &amp;Manually</string>
+   </property>
+   <property name="toolTip">
+    <string>Commit Manually</string>
+   </property>
+  </action>
+  <action name="submitAction">
+   <property name="text">
+    <string>&amp;Submit All</string>
+   </property>
+   <property name="toolTip">
+    <string>Submit Changes</string>
+   </property>
+  </action>
+  <action name="revertAction">
+   <property name="text">
+    <string>&amp;Revert All</string>
+   </property>
+   <property name="toolTip">
+    <string>Revert</string>
+   </property>
+  </action>
+  <action name="selectAction">
+   <property name="text">
+    <string>S&amp;elect</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh Data from Database</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ConnectionWidget</class>
+   <extends>QTreeView</extends>
+   <header>connectionwidget.h</header>
+  </customwidget>
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
@@ -483,5 +642,22 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>sqlEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>830</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>758</x>
+     <y>520</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

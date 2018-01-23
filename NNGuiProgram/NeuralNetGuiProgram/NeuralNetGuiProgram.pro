@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += sql widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -27,7 +28,9 @@ SOURCES += main.cpp\
     startupwindow.cpp \
     onlinenn.cpp \
     modbussetupwindow.cpp \
-    runtime_window.cpp
+    runtime_window.cpp \
+    connectionwidget.cpp \
+    qsqlconnectiondialog.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -42,14 +45,17 @@ HEADERS  += nnconfigwindow.h \
     onlinenn.h \
     imodbus.h \
     modbussetupwindow.h \
-    runtime_window.h
+    runtime_window.h \
+    connectionwidget.h \
+    qsqlconnectiondialog.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
     mysqlsetupwindow.ui \
     startupwindow.ui \
     modbussetupwindow.ui \
-    runtime_window.ui
+    runtime_window.ui \
+    qsqlconnectiondialog.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \
