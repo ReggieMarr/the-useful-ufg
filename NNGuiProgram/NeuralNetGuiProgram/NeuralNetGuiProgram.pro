@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     modbussetupwindow.cpp \
     runtime_window.cpp \
     connectionwidget.cpp \
-    qsqlconnectiondialog.cpp
+    dataloggerwindow.cpp \
+    iosetupform.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -47,7 +48,8 @@ HEADERS  += nnconfigwindow.h \
     modbussetupwindow.h \
     runtime_window.h \
     connectionwidget.h \
-    qsqlconnectiondialog.h
+    dataloggerwindow.h \
+    iosetupform.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
@@ -55,7 +57,8 @@ FORMS    += nnconfigwindow.ui \
     startupwindow.ui \
     modbussetupwindow.ui \
     runtime_window.ui \
-    qsqlconnectiondialog.ui
+    dataloggerwindow.ui \
+    iosetupform.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \

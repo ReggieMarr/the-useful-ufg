@@ -14,6 +14,11 @@ const int DataTypeColumn = 0;
 const int AddrColumn = 1;
 const int DataColumn = 2;
 
+void runtime_Window::closeExternalWindow(dataLoggerWindow * targetClose)
+{
+    targetClose->close();
+}
+
 runtime_Window::runtime_Window(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::runtime_Window)
@@ -36,7 +41,7 @@ runtime_Window::runtime_Window(QWidget *parent) :
     ui->tabWidget->setTabEnabled(1,false);
     ui->tabWidget->setTabEnabled(2,false);
     processTypeOpened = false;
-
+    dataLoggingSetup = false;
 
 
     QStringList drivers = QSqlDatabase::drivers();
@@ -51,151 +56,36 @@ runtime_Window::runtime_Window(QWidget *parent) :
 //    if (!drivers.contains("QSQLITE"))
 //        ui.dbCheckBox->setEnabled(false);
 
-
-
-
-
     if (QSqlDatabase::drivers().isEmpty())
         QMessageBox::information(this, tr("No database drivers found"),
                                  tr("This demo requires at least one Qt database driver. "
                                     "Please check the documentation how to build the "
                                     "Qt SQL plugins."));
 
+    //connect(dataLoggerWindow,dataLoggerWindow::closeEvent(QCloseEvent),runtime_Window,closeExternalWindow(dataLoggerWindow));
+
+
+    MessageNames[0] << "Read Coils (1)" << "Read Discrete Inputs (2)" << "Read Holding Registers (3)"
+                    << "Read Input Registers (4)" << "Write Single Coil (5)" << "Write Single Register(6)"
+                    << "Write Multiple Coils (15)" << "Write Multiple Registers (16)";
+
+    MessageNames[1] << "Read Coils (0x01)" << "Read Discrete Inputs (0x02)" << "Read Holding Registers (0x03)"
+                    << "Read Input Registers (0x04)" << "Write Single Coil (0x05)" << "Write Single Register(0x06)"
+                    << "Write Multiple Coils (0x0f)" << "Write Multiple Registers (0x10)";
+
+    dataAddress = 0;
+    slaveAddress = 1;
+
+    ui->tagTableWidget->setRowCount(2);
+    ui->tagTableWidget->setColumnCount(3);
+    ui->tagTableWidget->setHorizontalHeaderLabels(QString("Tag Name;Input;Output").split(";"));
+
+    ui->addTagButton->setEnabled(true);
 }
 
 runtime_Window::~runtime_Window()
 {
     delete ui;
-}
-
-void runtime_Window::exec()
-{
-    QSqlQueryModel *model = new QSqlQueryModel(ui->historicalDataTableView);
-    model->setQuery(QSqlQuery(ui->sqlEdit->toPlainText(), ui->connectionWidget->currentDatabase()));
-    ui->historicalDataTableView->setModel(model);
-
-
-    if (model->lastError().type() != QSqlError::NoError)
-        emit statusMessage(model->lastError().text());
-    else if (model->query().isSelect())
-        emit statusMessage(tr("Query OK."));
-    else
-        emit statusMessage(tr("Query OK, number of affected rows: %1").arg(
-                           model->query().numRowsAffected()));
-
-    updateActions();
-}
-
-QSqlError runtime_Window::addConnection(const QString &driver, const QString &dbName, const QString &host,
-                            const QString &user, const QString &passwd, int port)
-{
-    static int cCount = 0;
-
-    QSqlError err;
-    QSqlDatabase db = QSqlDatabase::addDatabase(driver, QString("Browser%1").arg(++cCount));
-    db.setDatabaseName(dbName);
-    db.setHostName(host);
-    db.setPort(port);
-    if (!db.open(user, passwd)) {
-        err = db.lastError();
-        db = QSqlDatabase();
-        QSqlDatabase::removeDatabase(QString("Browser%1").arg(cCount));
-    }
-    ui->connectionWidget->refresh();
-
-    return err;
-}
-
-void runtime_Window::addConnection()
-{
-    QSqlConnectionDialog dialog(this);
-    if (dialog.exec() != QDialog::Accepted)
-        return;
-
-    if (dialog.useInMemoryDatabase()) {
-        QSqlDatabase::database("in_mem_db", false).close();
-        QSqlDatabase::removeDatabase("in_mem_db");
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "in_mem_db");
-        db.setDatabaseName(":memory:");
-        if (!db.open())
-            QMessageBox::warning(this, tr("Unable to open database"), tr("An error occurred while "
-                                                                         "opening the connection: ") + db.lastError().text());
-        QSqlQuery q("", db);
-        q.exec("drop table Movies");
-        q.exec("drop table Names");
-        q.exec("create table Movies (id integer primary key, Title varchar, Director varchar, Rating number)");
-        q.exec("insert into Movies values (0, 'Metropolis', 'Fritz Lang', '8.4')");
-        q.exec("insert into Movies values (1, 'Nosferatu, eine Symphonie des Grauens', 'F.W. Murnau', '8.1')");
-        q.exec("insert into Movies values (2, 'Bis ans Ende der Welt', 'Wim Wenders', '6.5')");
-        q.exec("insert into Movies values (3, 'Hardware', 'Richard Stanley', '5.2')");
-        q.exec("insert into Movies values (4, 'Mitchell', 'Andrew V. McLaglen', '2.1')");
-        q.exec("create table Names (id integer primary key, Firstname varchar, Lastname varchar, City varchar)");
-        q.exec("insert into Names values (0, 'Sala', 'Palmer', 'Morristown')");
-        q.exec("insert into Names values (1, 'Christopher', 'Walker', 'Morristown')");
-        q.exec("insert into Names values (2, 'Donald', 'Duck', 'Andeby')");
-        q.exec("insert into Names values (3, 'Buck', 'Rogers', 'Paris')");
-        q.exec("insert into Names values (4, 'Sherlock', 'Holmes', 'London')");
-        ui->connectionWidget->refresh();
-    } else {
-        QSqlError err = addConnection(dialog.driverName(), dialog.databaseName(), dialog.hostName(),
-                           dialog.userName(), dialog.password(), dialog.port());
-        if (err.type() != QSqlError::NoError)
-            QMessageBox::warning(this, tr("Unable to open database"), tr("An error occurred while "
-                                       "opening the connection: ") + err.text());
-    }
-}
-
-void runtime_Window::showTable(const QString &t)
-{
-    QSqlTableModel *model = new CustomModel(ui->historicalDataTableView, ui->connectionWidget->currentDatabase());
-    model->setEditStrategy(QSqlTableModel::OnRowChange);
-    model->setTable(ui->connectionWidget->currentDatabase().driver()->escapeIdentifier(t, QSqlDriver::TableName));
-    model->select();
-    if (model->lastError().type() != QSqlError::NoError)
-        emit statusMessage(model->lastError().text());
-    ui->historicalDataTableView->setModel(model);
-    ui->historicalDataTableView->setEditTriggers(QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed);
-
-    connect(ui->historicalDataTableView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-            this, SLOT(currentChanged()));
-    updateActions();
-}
-
-void runtime_Window::showMetaData(const QString &t)
-{
-    QSqlRecord rec = ui->connectionWidget->currentDatabase().record(t);
-    QStandardItemModel *model = new QStandardItemModel(ui->historicalDataTableView);
-
-    model->insertRows(0, rec.count());
-    model->insertColumns(0, 7);
-
-    model->setHeaderData(0, Qt::Horizontal, "Fieldname");
-    model->setHeaderData(1, Qt::Horizontal, "Type");
-    model->setHeaderData(2, Qt::Horizontal, "Length");
-    model->setHeaderData(3, Qt::Horizontal, "Precision");
-    model->setHeaderData(4, Qt::Horizontal, "Required");
-    model->setHeaderData(5, Qt::Horizontal, "AutoValue");
-    model->setHeaderData(6, Qt::Horizontal, "DefaultValue");
-
-
-    for (int i = 0; i < rec.count(); ++i) {
-        QSqlField fld = rec.field(i);
-        model->setData(model->index(i, 0), fld.name());
-        model->setData(model->index(i, 1), fld.typeID() == -1
-                ? QString(QMetaType::typeName(fld.type()))
-                : QString("%1 (%2)").arg(QMetaType::typeName(fld.type())).arg(fld.typeID()));
-        model->setData(model->index(i, 2), fld.length());
-        model->setData(model->index(i, 3), fld.precision());
-        model->setData(model->index(i, 4), fld.requiredStatus() == -1 ? QVariant("?")
-                : QVariant(bool(fld.requiredStatus())));
-        model->setData(model->index(i, 5), fld.isAutoValue());
-        model->setData(model->index(i, 6), fld.defaultValue());
-    }
-
-    ui->historicalDataTableView->setModel(model);
-    ui->historicalDataTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    updateActions();
 }
 
 void runtime_Window::on_controlSelectComboBox_currentIndexChanged(int index)
@@ -418,7 +308,6 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
             processTypeOpened = false;
             ui->connectionSelectionBox->removeItem(1);
             ui->connectionSelectionBox->removeItem(0);
-
             ui->messageBox->removeItem(7);
             ui->messageBox->removeItem(6);
             ui->messageBox->removeItem(5);
@@ -434,42 +323,34 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
     case 1:
         if(!processTypeOpened)
         {
-//            for(int i = 0; i< ui->connectionSelectionBox->maxVisibleItems();i++)
-//            {
-//                ui->connectionSelectionBox->removeItem(i);
-//            }
+
             ui->connectionSelectionBox->addItem("Offline");
             ui->connectionSelectionBox->addItem("Modbus");
             ui->connectionSelectionBox->setCurrentIndex(connectionType);
 
             if(ui->hexDisplayChk->isChecked())
             {
-                ui->messageBox->addItem("Read Coils (0x01)");
-                ui->messageBox->addItem("Read Discrete Inputs (0x02)");
-                ui->messageBox->addItem("Read Holding Registers (0x03)");
-                ui->messageBox->addItem("Read Input Registers (0x04)");
-                ui->messageBox->addItem("Write Single Coil (0x05)");
-                ui->messageBox->addItem("Write Single Register(0x06)");
-                ui->messageBox->addItem("Write Multiple Coils (0x0f)");
-                ui->messageBox->addItem("Write Multiple Registers (0x10)");
+                ui->messageBox->addItems(MessageNames[1]);
+
             }
             else
             {
-                ui->messageBox->addItem("Read Coils (1)");
-                ui->messageBox->addItem("Read Discrete Inputs (2)");
-                ui->messageBox->addItem("Read Holding Registers (3)");
-                ui->messageBox->addItem("Read Input Registers (4)");
-                ui->messageBox->addItem("Write Single Coil (5)");
-                ui->messageBox->addItem("Write Single Register(6)");
-                ui->messageBox->addItem("Write Multiple Coils (15)");
-                ui->messageBox->addItem("Write Multiple Registers (16)");
+                ui->messageBox->addItems(MessageNames[0]);
             }
-
             ui->messageBox->setCurrentText(0);
-
             processTypeOpened = true;
         }
 
+        break;
+    case 2:
+        if(!dataLoggingSetup)
+        {
+            setupWindow = new dataLoggerWindow;
+            setupWindow->show();
+            
+            //ui->tabWidget->setEnabled(false);
+            dataLoggingSetup = true;
+        }
         break;
     default:
         break;
@@ -512,17 +393,98 @@ void runtime_Window::releaseTcpModbus()
 
 void runtime_Window::on_dataLogChkBox_stateChanged(int arg1)
 {
-    if(arg1 == 1)
+    if(arg1 == 2)
     {
         ui->tabWidget->setTabEnabled(2,true);
     }
     else
     {
-        ui->tabWidget->setTabEnabled(2,true);
+        ui->tabWidget->setTabEnabled(2,false);
     }
 }
 
 void runtime_Window::on_sendQueryButton_clicked()
 {
+
+}
+
+void runtime_Window::on_IOSetupBtn_clicked()
+{
+
+}
+
+void runtime_Window::on_messageBox_currentIndexChanged(int index)
+{
+    if(ui->hexDisplayChk->isChecked())
+    {
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+    }
+    else
+    {
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+    }
+    ui->addTagButton->setEnabled(true);
+}
+
+void runtime_Window::on_startingAddressSelectBox_valueChanged(int arg1)
+{
+    dataAddress = arg1;
+    if(ui->hexDisplayChk->isChecked())
+    {
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+    }
+    else
+    {
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+    }
+    ui->addTagButton->setEnabled(true);
+}
+
+void runtime_Window::on_IDValBox_valueChanged(int arg1)
+{
+    slaveAddress = arg1;
+    if(ui->hexDisplayChk->isChecked())
+    {
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+    }
+    else
+    {
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+    }
+}
+
+void runtime_Window::on_addTagButton_clicked()
+{
+    TagObj.tagDataAddress.push_back(dataAddress);
+    TagObj.tagSlaveAddress.push_back(slaveAddress);
+    TagObj.IOState.push_back(0);
+    TagObj.tagName.push_back(QString(ui->tagNameEdit->text()).toStdString());
+    ui->tagTableWidget->setRowCount(ui->tagTableWidget->rowCount()+1);
+
+    //QTableWidgetItem * radioButtonItem = new QTableWidgetItem("radioButtonItem");
+    //radioButtonItem->setCheckState(Qt::Unchecked);
+
+    QString line = "hello";
+    for(int i=0; i<ui->tagTableWidget->rowCount(); i++)
+    {
+        for(int j=0; j<ui->tagTableWidget->columnCount(); j++)
+        {
+            QTableWidgetItem *pCell = ui->tagTableWidget->item(i, j);
+            if(!pCell)
+            {
+                pCell = new QTableWidgetItem;
+                ui->tagTableWidget->setItem(i, j, pCell);
+            }
+            pCell->setText(line);
+        }
+    }
+
+//    for(uint i = 0; TagObj.IOState.size();i++)
+//    {
+//        ui->tagTableWidget->setItem(i,i,TagObj.tagName.at(i));
+//        ui->tagTableWidget->setItem(i,i+1,0);
+//        ui->tagTableWidget->setItem(i,i+2,0);
+//    }
+    ui->addTagButton->setEnabled(false);
 
 }

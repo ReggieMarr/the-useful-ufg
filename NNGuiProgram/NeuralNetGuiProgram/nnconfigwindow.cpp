@@ -17,17 +17,13 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
 {
     ui->setupUi(this);
     QWidget::showMaximized();
-
-
     ui->targetmodeLabel->setVisible(false);
     trainingModeReceived = trainingMode;
     if(trainingMode)
     {
         ui->targetSelectBox->setVisible(false);
         ui->SelectTarget->setVisible(false);
-
         ui->StartNNButton->setEnabled(false);
-
         ui->learningRateSlider->setValue(0.15);
         ui->momentumSlider->setValue(0.50);
         ui->memorySlider->setValue(0.50);
@@ -72,7 +68,6 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
         ui->targetSelectBox->addItem("Offline Data");
         ui->targetSelectBox->addItem("Modbus TCP Conn");
         ui->targetSelectBox->addItem("Modbus RTU Conn");
-
         runType = -1;
         // create graph and assign data to it:
         ui->NNPlotWidget->addGraph();
@@ -84,7 +79,6 @@ NNConfigWindow::NNConfigWindow(QWidget *parent, bool trainingMode) :
         ui->NNPlotWidget->yAxis->setRange(-1, 1);
         ui->NNPlotWidget->replot();
         ui->SelectTarget->setVisible(true);
-
         ui->saveBiasesandWeights->setVisible(false);
         ui->pushButton->setVisible(false);
         ui->addInputLabel->setVisible(false);
