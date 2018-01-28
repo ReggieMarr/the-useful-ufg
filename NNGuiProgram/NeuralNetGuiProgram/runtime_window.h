@@ -5,6 +5,7 @@
 #include "executeneuralnet.h"
 //#include <QSqlTableModel>
 
+#include "QListWidgetItem"
 #include "dataloggerwindow.h"
 
 namespace Ui {
@@ -13,6 +14,8 @@ class runtime_Window;
 
 struct Tag {
     vector<string> tagName;
+    vector<string> tagIPAddress;
+    vector<int> tagMessageType;
     vector<int> IOState; //initialized to 0 output is -1 input is 1
     vector<int> tagDataAddress;
     vector<int> tagSlaveAddress;
@@ -70,10 +73,21 @@ private slots:
 
     void on_addTagButton_clicked();
 
+    void on_hexDisplayChk_stateChanged(int arg1);
+
+    void on_tagsTabWidget_currentChanged(int index);
+
+    void on_tagTableWidget_cellClicked(int row, int column);
+
+    void on_confirmTagsBtn_clicked();
+
+    void on_mainMenuBtn_clicked();
+
 private:
     //Browser * m_model;
     void releaseTcpModbus();
     void updateRegisterView( void );
+    void updateCombobox(int listIndex);
     modbus_t * m_tcpModbus = NULL;
     dataLoggerWindow * setupWindow;
     Ui::runtime_Window *ui;
@@ -86,6 +100,10 @@ private:
     int dataAddress;
     int slaveAddress;
     Tag TagObj;
-    QStringList MessageNames[2];
+    QStringList MessageNames[3];
+    bool firstTagMade,tagSet;
+    QListWidget *tagNames = new QListWidget;
+    QListWidget *inputCheckBoxes = new QListWidget;
+    QListWidget *outputCheckBoxes = new QListWidget;
 };
 #endif // RUNTIME_WINDOW_H

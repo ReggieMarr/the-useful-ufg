@@ -8,6 +8,7 @@
 #include "QSqlRecord"
 #include "QSqlField"
 #include "qsqlconnectiondialog.h"
+#include "startupwindow.h"
 
 
 const int DataTypeColumn = 0;
@@ -17,6 +18,17 @@ const int DataColumn = 2;
 void runtime_Window::closeExternalWindow(dataLoggerWindow * targetClose)
 {
     targetClose->close();
+}
+
+void runtime_Window::updateCombobox(int listIndex)
+{
+   uint boxSize =  ui->messageBox->count();
+   ui->messageBox->addItems(MessageNames[listIndex]);
+
+   for(int comboCount = boxSize -1;comboCount >= 0;comboCount--)
+   {
+       ui->messageBox->removeItem(comboCount);
+   }
 }
 
 runtime_Window::runtime_Window(QWidget *parent) :
@@ -72,15 +84,24 @@ runtime_Window::runtime_Window(QWidget *parent) :
     MessageNames[1] << "Read Coils (0x01)" << "Read Discrete Inputs (0x02)" << "Read Holding Registers (0x03)"
                     << "Read Input Registers (0x04)" << "Write Single Coil (0x05)" << "Write Single Register(0x06)"
                     << "Write Multiple Coils (0x0f)" << "Write Multiple Registers (0x10)";
+    MessageNames[2] << "Discrete Coils" << "Discrete Input Contacts" << "Analog Input Registers" << "Analog Holding Registers";
 
     dataAddress = 0;
-    slaveAddress = 1;
+    slaveAddress = 0;
 
-    ui->tagTableWidget->setRowCount(2);
+    ui->graphTableWidget->setRowCount(0);
+    ui->graphTableWidget->setColumnCount(3);
+    ui->graphTableWidget->setHorizontalHeaderLabels(QString("Var Name;X;Y").split(";"));
+
+    ui->tagTableWidget->setRowCount(0);
     ui->tagTableWidget->setColumnCount(3);
     ui->tagTableWidget->setHorizontalHeaderLabels(QString("Tag Name;Input;Output").split(";"));
 
     ui->addTagButton->setEnabled(true);
+    firstTagMade = false;
+    tagSet = false;
+
+    ui->confirmTagsBtn->setEnabled(false);
 }
 
 runtime_Window::~runtime_Window()
@@ -135,7 +156,6 @@ void runtime_Window::on_portEdit_textChanged(const QString &arg1)
 
 void runtime_Window::on_connectBtn_clicked()
 {
-
     QString tempQString = IPAddress[0] + "." + IPAddress[1] + "." +IPAddress[2] + "." +IPAddress[3];
     QByteArray tempByteArray = tempQString.toLatin1();
     char * ModbusIP = tempByteArray.data();//"192.168.2.80";
@@ -219,84 +239,6 @@ void runtime_Window::on_sendDataBtn_clicked()
     //const QString dataType = descriptiveDataTypeName( func );
 
     modbus_set_slave( m_tcpModbus, slave );
-
-    switch (ui->messageBox->currentIndex()) {
-    case 0:
-    {
-        //Read Coils (0x01)
-        ret = modbus_read_bits( m_tcpModbus, addr, num, dest );
-        break;
-    }
-    case 1:
-    {
-        //Read Discrete Inputs (0x02)
-        ret = modbus_read_input_bits( m_tcpModbus, addr, num, dest );
-        break;
-    }
-    case 2:
-    {
-        //Read Holding Registers (0x03)
-        ret = modbus_read_registers( m_tcpModbus, addr, num, dest16 );
-        is16Bit = true;
-        break;
-    }
-    case 3:
-    {
-        //Read Input Registers (0x04)
-        ret = modbus_read_input_registers( m_tcpModbus, addr, num, dest16 );
-        is16Bit = true;
-        break;
-    }
-    case 4:
-    {
-        //Write Single Coil (0x05)
-        ret = modbus_write_bit( m_tcpModbus, addr,
-                ui->dataDisplayTable->item( 0, DataColumn )->
-                    text().toInt(0, 0) ? 1 : 0 );
-        writeAccess = true;
-        num = 1;
-        break;
-    }
-    case 5:
-    {
-        //Write Single Register(0x06)
-        ret = modbus_write_register( m_tcpModbus, addr,
-                ui->dataDisplayTable->item( 0, DataColumn )->
-                    text().toInt(0, 0) );
-        writeAccess = true;
-        num = 1;
-        break;
-    }
-    case 6:
-    {
-        //Write Multiple Coils (0x0f)
-        uint8_t * data = new uint8_t[num];
-        for( int i = 0; i < num; ++i )
-        {
-            data[i] = ui->dataDisplayTable->item( i, DataColumn )->
-                            text().toInt(0, 0);
-        }
-        ret = modbus_write_bits( m_tcpModbus, addr, num, data );
-        delete[] data;
-        writeAccess = true;
-        break;
-    }
-    case 7:
-    {
-        //Write Multiple Registers (0x10)
-        uint16_t * data = new uint16_t[num];
-        for( int i = 0; i < num; ++i )
-        {
-            data[i] = ui->dataDisplayTable->item( i, DataColumn )->
-                            text().toInt(0, 0);
-        }
-        ret = modbus_write_registers( m_tcpModbus, addr, num, data );
-        delete[] data;
-        writeAccess = true;
-        break;
-    }
-
-    }
 }
 
 void runtime_Window::on_tabWidget_currentChanged(int index)
@@ -308,17 +250,11 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
             processTypeOpened = false;
             ui->connectionSelectionBox->removeItem(1);
             ui->connectionSelectionBox->removeItem(0);
-            ui->messageBox->removeItem(7);
-            ui->messageBox->removeItem(6);
-            ui->messageBox->removeItem(5);
-            ui->messageBox->removeItem(4);
-            ui->messageBox->removeItem(3);
-            ui->messageBox->removeItem(2);
-            ui->messageBox->removeItem(1);
-            ui->messageBox->removeItem(0);
+            updateCombobox(1);
         }
 
         ui->interactionSelect->setCurrentIndex(connectionType);
+        ui->tagsTabWidget->setCurrentIndex(0);
         break;
     case 1:
         if(!processTypeOpened)
@@ -330,12 +266,14 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
 
             if(ui->hexDisplayChk->isChecked())
             {
-                ui->messageBox->addItems(MessageNames[1]);
+                updateCombobox(1);
+                //ui->messageBox->addItems(MessageNames[1]);
 
             }
             else
             {
-                ui->messageBox->addItems(MessageNames[0]);
+                updateCombobox(0);
+                //ui->messageBox->addItems(MessageNames[0]);
             }
             ui->messageBox->setCurrentText(0);
             processTypeOpened = true;
@@ -415,27 +353,44 @@ void runtime_Window::on_IOSetupBtn_clicked()
 
 void runtime_Window::on_messageBox_currentIndexChanged(int index)
 {
-    if(ui->hexDisplayChk->isChecked())
+    if(ui->tagsTabWidget->currentIndex() == 0)
     {
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        if(ui->hexDisplayChk->isChecked())
+        {
+            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        }
+        else
+        {
+            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        }
     }
     else
     {
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[2].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
     }
+
     ui->addTagButton->setEnabled(true);
 }
 
 void runtime_Window::on_startingAddressSelectBox_valueChanged(int arg1)
 {
     dataAddress = arg1;
-    if(ui->hexDisplayChk->isChecked())
+    if(ui->tagsTabWidget->currentIndex() == 0)
     {
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        if(ui->hexDisplayChk->isChecked())
+        {
+            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        }
+        else
+        {
+            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        }
     }
     else
     {
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+
+        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[2].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
     }
     ui->addTagButton->setEnabled(true);
 }
@@ -445,46 +400,217 @@ void runtime_Window::on_IDValBox_valueChanged(int arg1)
     slaveAddress = arg1;
     if(ui->hexDisplayChk->isChecked())
     {
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
     }
     else
     {
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
     }
 }
 
 void runtime_Window::on_addTagButton_clicked()
 {
+
     TagObj.tagDataAddress.push_back(dataAddress);
     TagObj.tagSlaveAddress.push_back(slaveAddress);
     TagObj.IOState.push_back(0);
     TagObj.tagName.push_back(QString(ui->tagNameEdit->text()).toStdString());
+    TagObj.tagMessageType.push_back(ui->messageBox->currentIndex());
+
     ui->tagTableWidget->setRowCount(ui->tagTableWidget->rowCount()+1);
+    int tagNum = TagObj.tagDataAddress.size()-1;
 
-    //QTableWidgetItem * radioButtonItem = new QTableWidgetItem("radioButtonItem");
-    //radioButtonItem->setCheckState(Qt::Unchecked);
+    QTableWidgetItem *tagNameItem = new QTableWidgetItem;
 
-    QString line = "hello";
-    for(int i=0; i<ui->tagTableWidget->rowCount(); i++)
+    QStringList nameList;
+    for(uint t = TagObj.tagSlaveAddress.size()-1; t < TagObj.tagName.size();t++)
     {
-        for(int j=0; j<ui->tagTableWidget->columnCount(); j++)
+        nameList += QString::fromStdString(TagObj.tagName.at(t));
+    }
+
+    tagNameItem->setText(QString::fromStdString(TagObj.tagName.at(tagNum)));// = tagNames->item(tagNum);
+    ui->tagTableWidget->setItem(tagNum,0,tagNameItem);
+
+
+    // Create an element, which will serve as a checkbox
+    QTableWidgetItem *inputItem = new QTableWidgetItem;
+
+    switch (ui->messageBox->currentIndex())
+    {
+        case 0:
         {
-            QTableWidgetItem *pCell = ui->tagTableWidget->item(i, j);
-            if(!pCell)
-            {
-                pCell = new QTableWidgetItem;
-                ui->tagTableWidget->setItem(i, j, pCell);
-            }
-            pCell->setText(line);
+            //Discrete Output Coils (Read-Write)
+            inputItem->setCheckState(Qt::Unchecked);
+            break;
+        }
+        case 1:
+        {
+            //Discrete Input Contacts (Read Only)
+            inputItem->setCheckState(Qt::Checked);
+            break;
+        }
+        case 2:
+        {
+            //Analog Input Registers (Read Only)
+            inputItem->setCheckState(Qt::Checked);
+
+            break;
+        }
+        case 3:
+        {
+            //Analog Output Holding Registers (Read-Write)
+            inputItem->setCheckState(Qt::Unchecked);
+            break;
+        }
+    }
+    inputItem->setFlags(inputItem->flags() | (Qt::ItemIsUserCheckable));
+    ui->tagTableWidget->setItem(tagNum,1,inputItem);
+    // Set the checkbox in the second column    
+    QTableWidgetItem *outputItem = new QTableWidgetItem;
+
+    switch (ui->messageBox->currentIndex())
+    {
+        case 0:
+        {
+            //Discrete Output Coils (Read-Write)
+            outputItem->setCheckState(Qt::Checked);
+            break;
+        }
+        case 1:
+        {
+            //Discrete Input Contacts (Read Only)
+            outputItem->setCheckState(Qt::Unchecked);
+            break;
+        }
+        case 2:
+        {
+            //Analog Input Registers (Read Only)
+            outputItem->setCheckState(Qt::Unchecked);
+            break;
+        }
+        case 3:
+        {
+            //Analog Output Holding Registers (Read-Write)
+            outputItem->setCheckState(Qt::Checked);
+            break;
+        }
+    }
+    outputItem->setFlags(outputItem->flags() | (Qt::ItemIsUserCheckable));
+    ui->tagTableWidget->setItem(tagNum,2,outputItem);
+
+    ui->tagTableWidget->resizeColumnsToContents();
+    ui->tagTableWidget->resizeRowsToContents();
+    ui->addTagButton->setEnabled(false);
+
+    if(firstTagMade)
+    {
+        tagSet = true;
+    }
+
+    firstTagMade = true;
+
+    ui->confirmTagsBtn->setEnabled(true);
+}
+
+void runtime_Window::on_hexDisplayChk_stateChanged(int arg1)
+{
+    if(ui->tagsTabWidget->currentIndex() < 1)
+    {
+        if(arg1 == 2)
+        {
+            updateCombobox(1);
+        }
+        else
+        {
+            updateCombobox(0);
         }
     }
 
-//    for(uint i = 0; TagObj.IOState.size();i++)
-//    {
-//        ui->tagTableWidget->setItem(i,i,TagObj.tagName.at(i));
-//        ui->tagTableWidget->setItem(i,i+1,0);
-//        ui->tagTableWidget->setItem(i,i+2,0);
-//    }
-    ui->addTagButton->setEnabled(false);
+}
 
+void runtime_Window::on_tagsTabWidget_currentChanged(int index)
+{
+    if(index > 0)
+    {
+        updateCombobox(2);
+    }
+    else
+    {
+        if(ui->hexDisplayChk->isChecked())
+        {
+            updateCombobox(1);
+        }
+        else
+        {
+            updateCombobox(0);
+        }
+
+    }
+}
+
+void runtime_Window::on_tagTableWidget_cellClicked(int row, int column)
+{
+    if(firstTagMade)
+    {
+        if(column == 1)
+        {
+            if(ui->tagTableWidget->item(row,column)->checkState() == Qt::Checked)
+            {
+                    ui->tagTableWidget->item(row,column+1)->setCheckState(Qt::Unchecked);
+                    //TagObj.tagMessageType.at(row) = 1;
+            }
+            else if(ui->tagTableWidget->item(row,column+1)->checkState() == Qt::Unchecked || (
+                    TagObj.tagMessageType.at(row) == 1 || TagObj.tagMessageType.at(row) == 2))
+            {
+                ui->tagTableWidget->item(row,column)->setCheckState(Qt::Checked);
+            }
+        }
+        else if(column == 2)
+        {
+            if(ui->tagTableWidget->item(row,column)->checkState() == Qt::Checked)
+            {
+                if(TagObj.tagMessageType.at(row) == 1 || TagObj.tagMessageType.at(row) == 2)
+                {
+                    ui->tagTableWidget->item(row,column-1)->setCheckState(Qt::Checked);
+                    ui->tagTableWidget->item(row,column)->setCheckState(Qt::Unchecked);
+                }
+                else
+                {
+                    ui->tagTableWidget->item(row,column-1)->setCheckState(Qt::Unchecked);
+                }
+            }
+            else if(ui->tagTableWidget->item(row,column-1)->checkState() == Qt::Unchecked )
+            {
+                ui->tagTableWidget->item(row,column)->setCheckState(Qt::Checked);
+            }
+        }
+        tagSet = false;
+    }
+}
+
+void runtime_Window::on_confirmTagsBtn_clicked()
+{
+    QTableWidgetItem *tempWidget = new QTableWidgetItem;
+
+
+    for(uint rowNum = 0;rowNum < TagObj.tagName.size();rowNum++)
+    {
+        TagObj.tagName.at(rowNum) = ui->tagTableWidget->item(rowNum,0)->text().toStdString();
+        if(ui->tagTableWidget->item(rowNum,1)->checkState() == Qt::Checked)
+        {
+            TagObj.IOState.at(rowNum) = 1;
+        }
+        else if(ui->tagTableWidget->item(rowNum,1)->checkState() == Qt::Unchecked)
+        {
+            TagObj.IOState.at(rowNum) = -1;
+        }
+    }
+}
+
+void runtime_Window::on_mainMenuBtn_clicked()
+{
+    StartupWindow *mainMenu;
+    this->close();
+    mainMenu = new StartupWindow(this);
+    mainMenu->show();
 }
