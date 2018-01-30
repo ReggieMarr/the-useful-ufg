@@ -9,7 +9,7 @@
 #include "QSqlField"
 #include "qsqlconnectiondialog.h"
 #include "startupwindow.h"
-
+#include "loadtrainingdata.h"
 
 
 const int DataTypeColumn = 0;
@@ -110,13 +110,69 @@ runtime_Window::~runtime_Window()
 
 void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
 {
-    dbInformation = receivedSourceConfig;// datasetup->addedSource;
-//    dbInformation.database = receivedSourceConfig.database;
-//    dbInformation.password = receivedSourceConfig.password;
-//    dbInformation.port = receivedSourceConfig.port;
-//    dbInformation.serverIP = receivedSourceConfig.serverIP;
-//    dbInformation.sourceType = receivedSourceConfig.sourceType;
-//    dbInformation.user = receivedSourceConfig.user;
+    dbInformation = receivedSourceConfig;
+
+    if(dbInformation.sourceType == 1 || dbInformation.sourceType == 0)
+    {
+        ui->SQLgroupBox->setVisible(false);
+       QString extensionType = dbInformation.database.split(".",QString::SkipEmptyParts).at(1);
+
+       vector<double> inputVals, currentTargetVals;
+
+       if(extensionType == "txt")
+       {
+           const string dataFile = dbInformation.database.toStdString();
+
+           TrainingData trainData(dataFile);
+
+           //cout << "Got training data \n";
+           // e.g., { 3, 2, 1 }
+           vector<unsigned> topology;
+           trainData.getTopology(topology);
+           int trainingPass = 0;
+           ui->historicalDataTableWidget->setColumnCount(3);
+           ui->historicalDataTableWidget->setRowCount(1);
+
+           while (!trainData.isEof()) {
+               ++trainingPass;
+
+               // Get new input data and feed it forward:
+               if (trainData.getNextInputs(inputVals) != topology[0]) {
+                   //cout << "\n you broke it, it went to this " << trainData.getNextInputs(inputVals) << endl;
+                   break;
+               }
+               //trainData.getNextInputs(inputVals);
+               QTableWidgetItem *inputCellValues = new QTableWidgetItem;
+
+               inputCellValues->setText("in:");
+               ui->historicalDataTableWidget->setRowCount(ui->historicalDataTableWidget->rowCount()+2);
+               //ui->historicalDataTableWidget->insertRow(ui->historicalDataTableWidget->rowCount()+1);
+               ui->historicalDataTableWidget->setItem(trainingPass,0,inputCellValues);
+               for(uint i = 0;i<inputVals.size();i++)
+               {
+                   QTableWidgetItem *newInputCellValues = new QTableWidgetItem;
+                   newInputCellValues->setText(QString::number(inputVals.at(i)));
+                   ui->historicalDataTableWidget->setItem(trainingPass,i+1,newInputCellValues);
+               }
+               ++trainingPass;
+               // Train the net what the outputs should have been:
+               trainData.getTargetOutputs(currentTargetVals);
+
+               //showVectorVals("Targets:", targetVals);
+               assert(currentTargetVals.size() == topology.back());
+               QTableWidgetItem *outputCellValues = new QTableWidgetItem;
+               outputCellValues->setText("out:");
+               //ui->historicalDataTableWidget->insertRow(ui->historicalDataTableWidget->rowCount());
+               ui->historicalDataTableWidget->setItem(trainingPass,0,outputCellValues);
+               for(uint i = 0;i<currentTargetVals.size();i++)
+               {
+                   QTableWidgetItem *newOutputCellValues = new QTableWidgetItem;
+                   newOutputCellValues->setText(QString::number(currentTargetVals.at(i)));
+                   ui->historicalDataTableWidget->setItem(trainingPass,i+1,newOutputCellValues);
+               }
+           }
+       }
+    }
 }
 
 void runtime_Window::on_controlSelectComboBox_currentIndexChanged(int index)
@@ -354,12 +410,7 @@ void runtime_Window::on_dataLogChkBox_stateChanged(int arg1)
 
 void runtime_Window::on_sendQueryButton_clicked()
 {
-     if(dbInformation.sourceType == 1 || dbInformation.sourceType == 0)
-     {
-         ui->SQLgroupBox->setVisible(false);
 
-
-     }
 }
 
 
@@ -448,7 +499,7 @@ void runtime_Window::on_addTagButton_clicked()
         nameList += QString::fromStdString(TagObj.tagName.at(t));
     }
 
-    tagNameItem->setText(QString::fromStdString(TagObj.tagName.at(tagNum)));// = tagNames->item(tagNum);
+    tagNameItem->setText(QString::fromStdString(TagObj.tagName.at(tagNum)));
     ui->tagTableWidget->setItem(tagNum,0,tagNameItem);
 
 
