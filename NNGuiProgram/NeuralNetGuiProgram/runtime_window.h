@@ -4,9 +4,8 @@
 #include <QMainWindow>
 #include "executeneuralnet.h"
 //#include <QSqlTableModel>
-
 #include "QListWidgetItem"
-#include "dataloggerwindow.h"
+#include "datalogdialogwindow.h"
 
 namespace Ui {
 class runtime_Window;
@@ -33,6 +32,10 @@ public:
     void insertRow();
     void deleteRow();
     void updateActions();
+
+    sourceInformation dbInformation;
+public slots:
+    void dbSourceConfigured(sourceInformation receivedSourceConfig);
 
 private slots:
     void on_controlSelectComboBox_currentIndexChanged(int index);
@@ -61,10 +64,6 @@ private slots:
 
     void on_sendQueryButton_clicked();
 
-    void closeExternalWindow(dataLoggerWindow * targetClose);
-
-    void on_IOSetupBtn_clicked();
-
     void on_messageBox_currentIndexChanged(int index);
 
     void on_startingAddressSelectBox_valueChanged(int arg1);
@@ -89,7 +88,6 @@ private:
     void updateRegisterView( void );
     void updateCombobox(int listIndex);
     modbus_t * m_tcpModbus = NULL;
-    dataLoggerWindow * setupWindow;
     Ui::runtime_Window *ui;
     QString IPAddress[4];
     int portNum;
@@ -105,5 +103,8 @@ private:
     QListWidget *tagNames = new QListWidget;
     QListWidget *inputCheckBoxes = new QListWidget;
     QListWidget *outputCheckBoxes = new QListWidget;
+    dataLogDialogWindow *datasetup;//  = new dataLogDialogWindow(this,dbType);
+
+    int dbType;
 };
 #endif // RUNTIME_WINDOW_H

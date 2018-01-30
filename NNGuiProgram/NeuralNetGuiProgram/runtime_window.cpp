@@ -11,14 +11,10 @@
 #include "startupwindow.h"
 
 
+
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
 const int DataColumn = 2;
-
-void runtime_Window::closeExternalWindow(dataLoggerWindow * targetClose)
-{
-    targetClose->close();
-}
 
 void runtime_Window::updateCombobox(int listIndex)
 {
@@ -102,11 +98,25 @@ runtime_Window::runtime_Window(QWidget *parent) :
     tagSet = false;
 
     ui->confirmTagsBtn->setEnabled(false);
+
+
+
 }
 
 runtime_Window::~runtime_Window()
 {
     delete ui;
+}
+
+void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
+{
+    dbInformation = receivedSourceConfig;// datasetup->addedSource;
+//    dbInformation.database = receivedSourceConfig.database;
+//    dbInformation.password = receivedSourceConfig.password;
+//    dbInformation.port = receivedSourceConfig.port;
+//    dbInformation.serverIP = receivedSourceConfig.serverIP;
+//    dbInformation.sourceType = receivedSourceConfig.sourceType;
+//    dbInformation.user = receivedSourceConfig.user;
 }
 
 void runtime_Window::on_controlSelectComboBox_currentIndexChanged(int index)
@@ -283,9 +293,10 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
     case 2:
         if(!dataLoggingSetup)
         {
-            setupWindow = new dataLoggerWindow;
-            setupWindow->show();
-            
+            //datasetup = new dataLogDialogWindow(this,dbType);
+            datasetup  = new dataLogDialogWindow(this,dbType);
+            connect(datasetup,SIGNAL(sendConfigInfo(sourceInformation)),this,SLOT(dbSourceConfigured(sourceInformation)));
+            datasetup->show();
             //ui->tabWidget->setEnabled(false);
             dataLoggingSetup = true;
         }
@@ -343,13 +354,14 @@ void runtime_Window::on_dataLogChkBox_stateChanged(int arg1)
 
 void runtime_Window::on_sendQueryButton_clicked()
 {
+     if(dbInformation.sourceType == 1 || dbInformation.sourceType == 0)
+     {
+         ui->SQLgroupBox->setVisible(false);
 
+
+     }
 }
 
-void runtime_Window::on_IOSetupBtn_clicked()
-{
-
-}
 
 void runtime_Window::on_messageBox_currentIndexChanged(int index)
 {
@@ -357,17 +369,17 @@ void runtime_Window::on_messageBox_currentIndexChanged(int index)
     {
         if(ui->hexDisplayChk->isChecked())
         {
-            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+            ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
         }
         else
         {
-            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+            ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
         }
     }
     else
     {
 
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[2].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
     }
 
     ui->addTagButton->setEnabled(true);
@@ -380,17 +392,17 @@ void runtime_Window::on_startingAddressSelectBox_valueChanged(int arg1)
     {
         if(ui->hexDisplayChk->isChecked())
         {
-            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[1].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+            ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
         }
         else
         {
-            ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[0].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+            ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
         }
     }
     else
     {
 
-        ui->tagNameEdit->setText("SL" + QString::number(slaveAddress) + MessageNames[2].at(ui->messageBox->currentIndex()) + QString::number(dataAddress));
+        ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
     }
     ui->addTagButton->setEnabled(true);
 }
@@ -398,12 +410,20 @@ void runtime_Window::on_startingAddressSelectBox_valueChanged(int arg1)
 void runtime_Window::on_IDValBox_valueChanged(int arg1)
 {
     slaveAddress = arg1;
-    if(ui->hexDisplayChk->isChecked())
+    if(ui->tagsTabWidget->currentIndex() == 0)
     {
-        ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
+        if(ui->hexDisplayChk->isChecked())
+        {
+            ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
+        }
+        else
+        {
+            ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
+        }
     }
     else
     {
+
         ui->tagNameEdit->setText("SA" + QString::number(slaveAddress) + "MT" + QString(ui->messageBox->currentIndex()) + "DA" + QString::number(dataAddress));
     }
 }
