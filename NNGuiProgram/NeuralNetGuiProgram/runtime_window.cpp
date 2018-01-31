@@ -11,6 +11,7 @@
 #include "startupwindow.h"
 #include "loadtrainingdata.h"
 #include "fstream"
+#include "qextserialenumerator.h"
 
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
@@ -108,6 +109,25 @@ runtime_Window::runtime_Window(QWidget *parent) :
     deviceOutputs.clear();
 
     dbLoaded = false;
+
+    QSettings s;
+
+    int portIndex = 0;
+    int i = 0;
+
+    foreach( QextPortInfo port, QextSerialEnumerator::getPorts() )
+    {
+#ifdef Q_OS_WIN
+        ui->serialComboBox->addItem( port.friendName );
+#else
+        ui->serialComboBox->addItem( port.physName );
+#endif
+        if( port.friendName == s.value( "serialinterface" ) )
+        {
+            portIndex = i;
+        }
+        ++i;
+    }
 
 }
 
