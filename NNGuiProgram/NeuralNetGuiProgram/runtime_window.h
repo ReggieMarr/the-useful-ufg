@@ -82,19 +82,24 @@ private slots:
 
     void on_mainMenuBtn_clicked();
 
+    void on_manualUpdateButton_clicked();
+
+    void on_historicalDataTableWidget_cellChanged(int row, int column);
+
 private:
     //Browser * m_model;
     void releaseTcpModbus();
     void updateRegisterView( void );
     void updateCombobox(int listIndex);
+    void updateDatabase(void);
+
     modbus_t * m_tcpModbus = NULL;
     Ui::runtime_Window *ui;
     QString IPAddress[4];
     int portNum;
     int connectionType;
     int manualMessageType;
-    bool processTypeOpened;
-    bool dataLoggingSetup;
+    bool processTypeOpened,dataLoggingSetup,dbLoaded;
     int dataAddress;
     int slaveAddress;
     Tag TagObj;
@@ -104,7 +109,8 @@ private:
     QListWidget *inputCheckBoxes = new QListWidget;
     QListWidget *outputCheckBoxes = new QListWidget;
     dataLogDialogWindow *datasetup;//  = new dataLogDialogWindow(this,dbType);
-
+    vector<vector<double>> deviceInputs;
+    vector<vector<double>> deviceOutputs;
     int dbType;
 };
 #endif // RUNTIME_WINDOW_H

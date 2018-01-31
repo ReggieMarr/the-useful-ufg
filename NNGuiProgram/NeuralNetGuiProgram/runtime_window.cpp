@@ -10,7 +10,7 @@
 #include "qsqlconnectiondialog.h"
 #include "startupwindow.h"
 #include "loadtrainingdata.h"
-
+#include "fstream"
 
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
@@ -65,10 +65,12 @@ runtime_Window::runtime_Window(QWidget *parent) :
 //        ui.dbCheckBox->setEnabled(false);
 
     if (QSqlDatabase::drivers().isEmpty())
+    {
         QMessageBox::information(this, tr("No database drivers found"),
                                  tr("This demo requires at least one Qt database driver. "
                                     "Please check the documentation how to build the "
                                     "Qt SQL plugins."));
+    }
 
     //connect(dataLoggerWindow,dataLoggerWindow::closeEvent(QCloseEvent),runtime_Window,closeExternalWindow(dataLoggerWindow));
 
@@ -99,7 +101,13 @@ runtime_Window::runtime_Window(QWidget *parent) :
 
     ui->confirmTagsBtn->setEnabled(false);
 
+    ui->jsonTreeWidget->setVisible(false);
 
+    deviceInputs.clear();
+
+    deviceOutputs.clear();
+
+    dbLoaded = false;
 
 }
 
@@ -108,13 +116,57 @@ runtime_Window::~runtime_Window()
     delete ui;
 }
 
+void runtime_Window::updateDatabase(void)
+{
+    QString extension;
+
+    extension = dbInformation.database.split(".",QString::SkipEmptyParts).at(1);
+
+    ofstream fileToWrite (dbInformation.database.toStdString());
+
+    if(fileToWrite.is_open())
+    {
+        if(extension == "txt")
+        {
+            fileToWrite << "topology: 2 4 1" << endl;
+            for(uint entryVal = 0; entryVal < deviceInputs.size();entryVal++)
+            {
+                fileToWrite << "in: ";
+                for(uint itemVal = 0;itemVal<deviceInputs.at(entryVal).size();itemVal++)
+                {
+                    fileToWrite << deviceInputs.at(entryVal).at(itemVal) << " ";
+                }
+
+                fileToWrite << endl << "out: ";
+
+                for(uint itemVal = 0;itemVal<deviceOutputs.at(entryVal).size();itemVal++)
+                {
+                    fileToWrite << deviceOutputs.at(entryVal).at(itemVal) << " ";
+                }
+                fileToWrite << endl;
+            }
+            fileToWrite << endl;
+        }
+        fileToWrite.close();
+    }
+    else
+    {
+        cout << "Something went wrong \n";
+    }
+
+}
+
 void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
 {
     dbInformation = receivedSourceConfig;
 
     if(dbInformation.sourceType == 1 || dbInformation.sourceType == 0)
     {
-        ui->SQLgroupBox->setVisible(false);
+       ui->sendQueryButton->setVisible(false);
+       ui->clearButton->setVisible(false);
+       ui->sqlEdit->setVisible(false);
+       ui->dbLogConfigureBox->setTitle("Configure Database Update");
+
        QString extensionType = dbInformation.database.split(".",QString::SkipEmptyParts).at(1);
 
        vector<double> inputVals, currentTargetVals;
@@ -141,6 +193,7 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                    //cout << "\n you broke it, it went to this " << trainData.getNextInputs(inputVals) << endl;
                    break;
                }
+               deviceInputs.push_back(inputVals);
                //trainData.getNextInputs(inputVals);
                QTableWidgetItem *inputCellValues = new QTableWidgetItem;
 
@@ -158,6 +211,8 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                // Train the net what the outputs should have been:
                trainData.getTargetOutputs(currentTargetVals);
 
+               deviceOutputs.push_back(currentTargetVals);
+
                //showVectorVals("Targets:", targetVals);
                assert(currentTargetVals.size() == topology.back());
                QTableWidgetItem *outputCellValues = new QTableWidgetItem;
@@ -171,6 +226,15 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                    ui->historicalDataTableWidget->setItem(trainingPass,i+1,newOutputCellValues);
                }
            }
+           dbLoaded = true;
+       }
+       else if(extensionType == "csv")
+       {
+
+       }
+       else if(extensionType == "json")
+       {
+           ui->jsonTreeWidget->setVisible(true);
        }
     }
 }
@@ -257,10 +321,14 @@ void runtime_Window::updateRegisterView( void )
         case 6:
         //Write Multiple Coils (0x0f)
         case 7:
-        //Write Multiple Registers (0x10)
+        {
+            //Write Multiple Registers (0x10)
             rowCount = ui->numberofCoilsSpin->value();
+        }
         default:
+        {
             ui->numberofCoilsSpin->setEnabled( true );
+        }
             break;
     }
 
@@ -412,7 +480,6 @@ void runtime_Window::on_sendQueryButton_clicked()
 {
 
 }
-
 
 void runtime_Window::on_messageBox_currentIndexChanged(int index)
 {
@@ -628,7 +695,6 @@ void runtime_Window::on_tagTableWidget_cellClicked(int row, int column)
             if(ui->tagTableWidget->item(row,column)->checkState() == Qt::Checked)
             {
                     ui->tagTableWidget->item(row,column+1)->setCheckState(Qt::Unchecked);
-                    //TagObj.tagMessageType.at(row) = 1;
             }
             else if(ui->tagTableWidget->item(row,column+1)->checkState() == Qt::Unchecked || (
                     TagObj.tagMessageType.at(row) == 1 || TagObj.tagMessageType.at(row) == 2))
@@ -684,4 +750,41 @@ void runtime_Window::on_mainMenuBtn_clicked()
     this->close();
     mainMenu = new StartupWindow(this);
     mainMenu->show();
+}
+
+void runtime_Window::on_manualUpdateButton_clicked()
+{
+    updateDatabase();
+}
+
+void runtime_Window::on_historicalDataTableWidget_cellChanged(int row, int column)
+{
+    if(dbLoaded)
+    {
+        //deviceInputs/Outputs position of stored data must be offset due to
+        //topology taking first row and in or out taking up the first column
+        if(ui->historicalDataTableWidget->item(row,0)->text() == "in:")
+        {
+            if(row>2)
+            {
+                deviceInputs.at(row-2).at(column-1) = ui->historicalDataTableWidget->item(row,column)->text().toDouble();
+            }
+            else
+            {
+                deviceInputs.at(row-1).at(column-1) = ui->historicalDataTableWidget->item(row,column)->text().toDouble();
+            }
+        }
+        else if(ui->historicalDataTableWidget->item(row,0)->text() == "out:")
+        {
+            if(row>2)
+            {
+                deviceOutputs.at(row).at(column-1) = ui->historicalDataTableWidget->item(row,column)->text().toDouble();
+            }
+            else
+            {
+                deviceOutputs.at(row).at(column-1) = ui->historicalDataTableWidget->item(row,column)->text().toDouble();
+            }
+            deviceOutputs.at(row).at(column-1) = ui->historicalDataTableWidget->item(row,column)->text().toDouble();
+        }
+    }
 }

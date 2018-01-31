@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1201</width>
-    <height>970</height>
+    <width>1316</width>
+    <height>1156</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -617,17 +617,29 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QGroupBox" name="SQLgroupBox">
+        <item row="0" column="2">
+         <widget class="QTableWidget" name="historicalDataTableWidget"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QTreeWidget" name="jsonTreeWidget">
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QGroupBox" name="dbLogConfigureBox">
           <property name="title">
            <string>SQL Query</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
+          <layout class="QGridLayout" name="gridLayout_9">
+           <item row="0" column="0" colspan="3">
             <widget class="QTextEdit" name="sqlEdit"/>
            </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item row="1" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="clearSubmitHorizontalLayout">
              <item>
               <spacer name="horizontalSpacer_4">
                <property name="orientation">
@@ -657,11 +669,35 @@
              </item>
             </layout>
            </item>
+           <item row="2" column="2">
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="autoUpdateConfigButton">
+             <property name="text">
+              <string>Configure Auto Update</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QPushButton" name="manualUpdateButton">
+             <property name="text">
+              <string>Manual Update</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QTableWidget" name="historicalDataTableWidget"/>
         </item>
        </layout>
       </widget>
@@ -698,7 +734,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1201</width>
+     <width>1316</width>
      <height>22</height>
     </rect>
    </property>
