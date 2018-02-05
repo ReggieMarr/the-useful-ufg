@@ -86,6 +86,12 @@ private slots:
 
     void on_historicalDataTableWidget_cellChanged(int row, int column);
 
+    void on_autoUpdateConfigButton_clicked();
+
+    void on_convertDbButton_clicked();
+
+    void on_saveToFileChkBox_stateChanged(int arg1);
+
 private:
     //Browser * m_model;
     void releaseTcpModbus();
@@ -112,5 +118,6 @@ private:
     vector<vector<double>> deviceInputs;
     vector<vector<double>> deviceOutputs;
     int dbType;
+    bool dbConvertOccurred;
 };
 #endif // RUNTIME_WINDOW_H

@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     modbussetupwindow.cpp \
     runtime_window.cpp \
     connectionwidget.cpp \
-    datalogdialogwindow.cpp
+    datalogdialogwindow.cpp \
+    executelogicsetupwindow.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -47,7 +48,8 @@ HEADERS  += nnconfigwindow.h \
     modbussetupwindow.h \
     runtime_window.h \
     connectionwidget.h \
-    datalogdialogwindow.h
+    datalogdialogwindow.h \
+    executelogicsetupwindow.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
@@ -55,7 +57,8 @@ FORMS    += nnconfigwindow.ui \
     startupwindow.ui \
     modbussetupwindow.ui \
     runtime_window.ui \
-    datalogdialogwindow.ui
+    datalogdialogwindow.ui \
+    executelogicsetupwindow.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \

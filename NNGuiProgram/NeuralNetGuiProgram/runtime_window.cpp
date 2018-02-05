@@ -12,6 +12,7 @@
 #include "loadtrainingdata.h"
 #include "fstream"
 #include "qextserialenumerator.h"
+#include "executelogicsetupwindow.h"
 
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
@@ -129,6 +130,9 @@ runtime_Window::runtime_Window(QWidget *parent) :
         ++i;
     }
 
+    dbConvertOccurred = false;
+    ui->saveToFileChkBox->setEnabled(false);
+
 }
 
 runtime_Window::~runtime_Window()
@@ -195,6 +199,7 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
        {
            const string dataFile = dbInformation.database.toStdString();
 
+           ui->convertComboBox->addItems(QString("txt to csv;txt to MySQL table;txt to JSON").split(";"));
            TrainingData trainData(dataFile);
 
            //cout << "Got training data \n";
@@ -204,12 +209,37 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
            int trainingPass = 0;
            ui->historicalDataTableWidget->setColumnCount(3);
            ui->historicalDataTableWidget->setRowCount(1);
+           bool firstRun = true;
 
-           while (!trainData.isEof()) {
-               ++trainingPass;
+           while (!trainData.isEof())
+           {
+               //++trainingPass;
+
+               if(firstRun)
+               {
+                   QTableWidgetItem *firstRowItem = new QTableWidgetItem;
+                   firstRowItem->setText("topology:");
+                   ui->historicalDataTableWidget->setRowCount(ui->historicalDataTableWidget->rowCount()+2);
+                   ui->historicalDataTableWidget->setItem(trainingPass,0,firstRowItem);
+                   ui->historicalDataTableWidget->setColumnCount(topology.size()+1);
+                   for(uint i = 0;i<topology.size();i++)
+                   {
+                       QTableWidgetItem *fillFirstRowItem = new QTableWidgetItem;
+                       fillFirstRowItem->setText(QString::number(topology.at(i)));
+                       ui->historicalDataTableWidget->setItem(trainingPass,i+1,fillFirstRowItem);
+                   }
+
+                   trainingPass++;
+                   firstRun = false;
+               }
+               else
+               {
+                   trainingPass++;
+               }
 
                // Get new input data and feed it forward:
-               if (trainData.getNextInputs(inputVals) != topology[0]) {
+               if (trainData.getNextInputs(inputVals) != topology[0])
+               {
                    //cout << "\n you broke it, it went to this " << trainData.getNextInputs(inputVals) << endl;
                    break;
                }
@@ -250,13 +280,78 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
        }
        else if(extensionType == "csv")
        {
-
+            ui->convertComboBox->addItems(QString("csv to txt;csv to MySQL table;csv to JSON").split(";"));
        }
        else if(extensionType == "json")
        {
+           ui->convertComboBox->addItems(QString("JSON to txt;JSON to csv;JSON to MySQL Object").split(";"));
            ui->jsonTreeWidget->setVisible(true);
        }
     }
+}
+
+void runtime_Window::on_convertDbButton_clicked()
+{
+    dbConvertOccurred = true;
+
+    ui->saveToFileChkBox->setEnabled(true);
+    ui->saveToFileChkBox->setChecked(false);
+
+    if(dbInformation.sourceType == 0 || dbInformation.sourceType == 1)
+    {
+        if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "txt")
+        {
+            switch (ui->convertComboBox->currentIndex())
+            {
+            case 0:
+                {
+                    ui->historicalDataTableWidget->clearContents();
+                    ui->historicalDataTableWidget->setColumnCount(3);
+                    ui->historicalDataTableWidget->setRowCount(deviceInputs.size());
+                    ui->historicalDataTableWidget->setHorizontalHeaderLabels(QString("Input 1;Input 2;Output").split(";"));
+
+                    for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+                    {
+                        ui->historicalDataTableWidget->setColumnCount(deviceInputs.at(columnFill).size()+ deviceOutputs.at(columnFill).size());
+
+                        uint inputRowFill = 0;
+
+                        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+                        {
+                            QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+
+                            csvInputTableItems->setText(QString::number(deviceInputs.at(columnFill).at(inputRowFill)));
+                            ui->historicalDataTableWidget->setItem(columnFill,inputRowFill,csvInputTableItems);
+                        }
+                        uint outputRowFill;
+
+                        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+                        {
+                            QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+
+                            csvOutputTableItems->setText(QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)));
+                            ui->historicalDataTableWidget->setItem(columnFill,outputRowFill,csvOutputTableItems);
+                        }
+                    }
+                }
+                break;
+            case 1:
+                {
+                    ui->historicalDataTableWidget->clear();
+                }
+                break;
+            }
+        }
+        else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "csv")
+        {
+
+        }
+        else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "json")
+        {
+
+        }
+    }
+
 }
 
 void runtime_Window::on_controlSelectComboBox_currentIndexChanged(int index)
@@ -806,5 +901,126 @@ void runtime_Window::on_historicalDataTableWidget_cellChanged(int row, int colum
             }
             deviceOutputs.at(row).at(column-1) = ui->historicalDataTableWidget->item(row,column)->text().toDouble();
         }
+    }
+}
+
+void runtime_Window::on_autoUpdateConfigButton_clicked()
+{
+    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
+    newLogicSetup->show();
+}
+
+void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
+{
+    if(arg1 == 2)
+    {
+
+        if(dbInformation.sourceType == 0 || dbInformation.sourceType == 1)
+        {
+            if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "txt")
+            {
+                switch (ui->convertComboBox->currentIndex())
+                {
+                case 0:
+                    {
+                    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".csv";
+                    QString initialDirectory;
+
+                    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                    {
+                        initialDirectory += directoryList.at(dirCycle) + "/";
+                    }
+
+                    QString savedir = QFileDialog::getExistingDirectory(
+                                this, tr("Open Directory"),
+                                initialDirectory,
+                                QFileDialog::ShowDirsOnly
+                                | QFileDialog::DontResolveSymlinks);
+
+                    dbInformation.database = defaultName;
+
+                    ofstream updatedFile;
+
+                    updatedFile.open(defaultName.toStdString());
+
+                    for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+                    {
+
+                        uint inputRowFill = 0;
+
+                        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+                        {
+                            QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+
+                            updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + ",";
+                        }
+                        uint outputRowFill;
+
+                        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+                        {
+                            QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+
+                            updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + ",";
+                        }
+                        updatedFile << endl;
+                    }
+
+                    updatedFile.close();
+
+                    }
+                    break;
+                case 1:
+                    {
+                    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".csv";
+                    QString initialDirectory;
+
+                    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                    {
+                        initialDirectory += directoryList.at(dirCycle) + "/";
+                    }
+
+                    QString savedir = QFileDialog::getExistingDirectory(
+                                this, tr("Open Directory"),
+                                initialDirectory,
+                                QFileDialog::ShowDirsOnly
+                                | QFileDialog::DontResolveSymlinks);
+
+                    dbInformation.database = defaultName;
+                    }
+                    break;
+                case 2:
+                {
+                    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".json";
+                    QString initialDirectory;
+
+                    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                    {
+                        initialDirectory += directoryList.at(dirCycle) + "/";
+                    }
+
+                    QString savedir = QFileDialog::getExistingDirectory(
+                                this, tr("Open Directory"),
+                                initialDirectory,
+                                QFileDialog::ShowDirsOnly
+                                | QFileDialog::DontResolveSymlinks);
+
+                    dbInformation.database = defaultName;
+                }
+                    break;
+                }
+            }
+            else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "csv")
+            {
+
+            }
+            else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "json")
+            {
+
+            }
+        }
+
     }
 }

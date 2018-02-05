@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="supervisionTab">
        <attribute name="title">
@@ -471,7 +471,7 @@
         <item row="4" column="0" colspan="4">
          <widget class="QTabWidget" name="tagsTabWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="requestTab">
            <attribute name="title">
@@ -721,10 +721,17 @@
            <string>SQL Query</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_9">
-           <item row="0" column="0" colspan="3">
+           <item row="3" column="1">
+            <widget class="QPushButton" name="manualUpdateButton">
+             <property name="text">
+              <string>Manual Update</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="5">
             <widget class="QTextEdit" name="sqlEdit"/>
            </item>
-           <item row="1" column="0" colspan="3">
+           <item row="1" column="0" colspan="5">
             <layout class="QHBoxLayout" name="clearSubmitHorizontalLayout">
              <item>
               <spacer name="horizontalSpacer_4">
@@ -755,7 +762,7 @@
              </item>
             </layout>
            </item>
-           <item row="2" column="2">
+           <item row="2" column="4">
             <spacer name="horizontalSpacer_6">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -775,10 +782,26 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="QPushButton" name="manualUpdateButton">
+           <item row="4" column="1">
+            <widget class="QComboBox" name="convertComboBox"/>
+           </item>
+           <item row="2" column="2" rowspan="2">
+            <widget class="QCheckBox" name="saveToFileChkBox">
              <property name="text">
-              <string>Manual Update</string>
+              <string>DB Saved To Local Machine</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QPushButton" name="convertDbButton">
+             <property name="text">
+              <string>Convert DB Type</string>
              </property>
             </widget>
            </item>
