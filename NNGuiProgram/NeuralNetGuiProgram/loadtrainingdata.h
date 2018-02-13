@@ -14,8 +14,6 @@ using namespace std;
 // program, e.g., connect to a database, or take a stream of data from stdin, or
 // from a file specified by a command line argument, etc.
 
-//It is worth noting this c++ class is isolated from the others
-
 class TrainingData
 {
 public:

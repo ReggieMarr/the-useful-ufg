@@ -97,7 +97,7 @@ private:
     void releaseTcpModbus();
     void updateRegisterView( void );
     void updateCombobox(int listIndex);
-    void updateDatabase(void);
+    void updateDatabase(bool tableOnly, int dbType);
 
     modbus_t * m_tcpModbus = NULL;
     Ui::runtime_Window *ui;
@@ -117,6 +117,7 @@ private:
     dataLogDialogWindow *datasetup;//  = new dataLogDialogWindow(this,dbType);
     vector<vector<double>> deviceInputs;
     vector<vector<double>> deviceOutputs;
+    vector<unsigned> savedTopology;
     int dbType;
     bool dbConvertOccurred;
 };

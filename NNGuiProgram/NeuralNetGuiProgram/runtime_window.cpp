@@ -140,42 +140,181 @@ runtime_Window::~runtime_Window()
     delete ui;
 }
 
-void runtime_Window::updateDatabase(void)
+void runtime_Window::updateDatabase(bool tableOnly,int dbType)
 {
-    QString extension;
 
-    extension = dbInformation.database.split(".",QString::SkipEmptyParts).at(1);
-
-    ofstream fileToWrite (dbInformation.database.toStdString());
-
-    if(fileToWrite.is_open())
+    switch (dbType) {
+    case 0:
     {
-        if(extension == "txt")
-        {
-            fileToWrite << "topology: 2 4 1" << endl;
-            for(uint entryVal = 0; entryVal < deviceInputs.size();entryVal++)
-            {
-                fileToWrite << "in: ";
-                for(uint itemVal = 0;itemVal<deviceInputs.at(entryVal).size();itemVal++)
-                {
-                    fileToWrite << deviceInputs.at(entryVal).at(itemVal) << " ";
-                }
 
-                fileToWrite << endl << "out: ";
-
-                for(uint itemVal = 0;itemVal<deviceOutputs.at(entryVal).size();itemVal++)
-                {
-                    fileToWrite << deviceOutputs.at(entryVal).at(itemVal) << " ";
-                }
-                fileToWrite << endl;
-            }
-            fileToWrite << endl;
-        }
-        fileToWrite.close();
     }
-    else
+    if(!tableOnly)
     {
-        cout << "Something went wrong \n";
+    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".txt";
+    QString initialDirectory;
+
+    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+    {
+        initialDirectory += directoryList.at(dirCycle) + "/";
+    }
+
+    QString savedir = QFileDialog::getExistingDirectory(
+                this, tr("Open Directory"),
+                initialDirectory,
+                QFileDialog::ShowDirsOnly
+                | QFileDialog::DontResolveSymlinks);
+
+    QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
+
+    defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
+
+    dbInformation.database = defaultName;
+
+    ofstream updatedFile;
+
+    updatedFile.open(defaultName.toStdString());
+
+    //write the topology here
+    updatedFile << "topology: ";
+    for(uint topologyCycle = 0;topologyCycle < savedTopology.size();topologyCycle++)
+    {
+        updatedFile << QString::number(savedTopology.at(topologyCycle)).toStdString() + " ";
+    }
+    updatedFile << endl;
+
+    for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+    {
+
+        uint inputRowFill = 0;
+
+        updatedFile << "in: ";
+        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+        {
+            QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+
+            updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + " ";
+        }
+        uint outputRowFill;
+        updatedFile << endl;
+
+        updatedFile << "out: ";
+        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+        {
+            QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+
+            updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + " ";
+        }
+        updatedFile << endl;
+    }
+
+    updatedFile.close();
+
+    }
+        break;
+    case 1:
+        if(!tableOnly)
+        {
+        QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+        QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".csv";
+        QString initialDirectory;
+
+        for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+        {
+            initialDirectory += directoryList.at(dirCycle) + "/";
+        }
+
+        QString savedir = QFileDialog::getExistingDirectory(
+                    this, tr("Open Directory"),
+                    initialDirectory,
+                    QFileDialog::ShowDirsOnly
+                    | QFileDialog::DontResolveSymlinks);
+        QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
+
+        defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
+
+        dbInformation.database = defaultName;
+        //start writing the file with the default name here
+        ofstream updatedFile;
+
+        updatedFile.open(defaultName.toStdString());
+
+        //write the topology here
+        for(uint topologyCycle = 0;topologyCycle < savedTopology.size()+1;topologyCycle++)
+        {
+            if(topologyCycle == 0)
+            {
+                updatedFile << "topology: ,";
+            }
+            else
+            {
+                updatedFile << QString::number(savedTopology.at(topologyCycle-1)).toStdString() + ",";
+            }
+        }
+        updatedFile << endl;
+
+        //denote input and output status here
+        uint inCycle;
+        for(inCycle = 0;inCycle < deviceInputs.at(0).size();inCycle++)
+        {
+            updatedFile << "I,";
+        }
+
+        for(uint outCycle = inCycle;outCycle < deviceOutputs.at(0).size()+inCycle;outCycle++)
+        {
+            updatedFile << "O,";
+        }
+        updatedFile << endl;
+
+        for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+        {
+
+            uint inputRowFill = 0;
+
+            for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+            {
+                QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+
+                updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + ",";
+            }
+            uint outputRowFill;
+
+            for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+            {
+                QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+
+                updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + ",";
+            }
+            updatedFile << endl;
+        }
+
+        updatedFile.close();
+
+        }
+        break;
+    case 2:
+        if(!tableOnly)
+        {
+            QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+            QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".json";
+            QString initialDirectory;
+
+            for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+            {
+                initialDirectory += directoryList.at(dirCycle) + "/";
+            }
+
+            QString savedir = QFileDialog::getExistingDirectory(
+                        this, tr("Open Directory"),
+                        initialDirectory,
+                        QFileDialog::ShowDirsOnly
+                        | QFileDialog::DontResolveSymlinks);
+
+            dbInformation.database = defaultName;
+        }
+        break;
+    default:
+        break;
     }
 
 }
@@ -204,8 +343,9 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
 
            //cout << "Got training data \n";
            // e.g., { 3, 2, 1 }
-           vector<unsigned> topology;
-           trainData.getTopology(topology);
+
+           savedTopology.clear();
+           trainData.getTopology(savedTopology);
            int trainingPass = 0;
            ui->historicalDataTableWidget->setColumnCount(3);
            ui->historicalDataTableWidget->setRowCount(1);
@@ -218,14 +358,14 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                if(firstRun)
                {
                    QTableWidgetItem *firstRowItem = new QTableWidgetItem;
-                   firstRowItem->setText("topology:");
+                   firstRowItem->setText("Topology:");
                    ui->historicalDataTableWidget->setRowCount(ui->historicalDataTableWidget->rowCount()+2);
                    ui->historicalDataTableWidget->setItem(trainingPass,0,firstRowItem);
-                   ui->historicalDataTableWidget->setColumnCount(topology.size()+1);
-                   for(uint i = 0;i<topology.size();i++)
+                   ui->historicalDataTableWidget->setColumnCount(savedTopology.size()+1);
+                   for(uint i = 0;i<savedTopology.size();i++)
                    {
                        QTableWidgetItem *fillFirstRowItem = new QTableWidgetItem;
-                       fillFirstRowItem->setText(QString::number(topology.at(i)));
+                       fillFirstRowItem->setText(QString::number(savedTopology.at(i)));
                        ui->historicalDataTableWidget->setItem(trainingPass,i+1,fillFirstRowItem);
                    }
 
@@ -238,7 +378,7 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                }
 
                // Get new input data and feed it forward:
-               if (trainData.getNextInputs(inputVals) != topology[0])
+               if (trainData.getNextInputs(inputVals) != savedTopology[0])
                {
                    //cout << "\n you broke it, it went to this " << trainData.getNextInputs(inputVals) << endl;
                    break;
@@ -246,7 +386,6 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                deviceInputs.push_back(inputVals);
                //trainData.getNextInputs(inputVals);
                QTableWidgetItem *inputCellValues = new QTableWidgetItem;
-
                inputCellValues->setText("in:");
                ui->historicalDataTableWidget->setRowCount(ui->historicalDataTableWidget->rowCount()+2);
                //ui->historicalDataTableWidget->insertRow(ui->historicalDataTableWidget->rowCount()+1);
@@ -264,7 +403,7 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
                deviceOutputs.push_back(currentTargetVals);
 
                //showVectorVals("Targets:", targetVals);
-               assert(currentTargetVals.size() == topology.back());
+               assert(currentTargetVals.size() == savedTopology.back());
                QTableWidgetItem *outputCellValues = new QTableWidgetItem;
                outputCellValues->setText("out:");
                //ui->historicalDataTableWidget->insertRow(ui->historicalDataTableWidget->rowCount());
@@ -281,6 +420,136 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
        else if(extensionType == "csv")
        {
             ui->convertComboBox->addItems(QString("csv to txt;csv to MySQL table;csv to JSON").split(";"));
+
+            const string dataFile = dbInformation.database.toStdString();
+
+            ifstream dbFile(dataFile);
+
+            dbFile.exceptions(std::ifstream::failbit|std::ifstream::badbit);
+            string checkStr;
+            unsigned inputSize = 0;
+            unsigned outputSize = 0;
+            savedTopology.clear();
+            string::size_type sz;
+            int trainingPass = 0;
+            QStringList headerList;
+
+            //read the topology then figure out the Inputs and outputs
+            getline(dbFile,checkStr,'\n');
+            stringstream ssTopLine(checkStr);
+            while(getline(ssTopLine,checkStr,','))
+            {
+                if(checkStr=="topology: " )
+                {
+                    // i guess this would be the topology found
+                }
+                else
+                {
+                    savedTopology.push_back(stoi(checkStr,&sz));
+                }
+            }
+
+            QTableWidgetItem *firstRowItem = new QTableWidgetItem;
+            firstRowItem->setText("topology:");
+            ui->historicalDataTableWidget->setColumnCount(savedTopology.size() + 1);
+            ui->historicalDataTableWidget->setRowCount(ui->historicalDataTableWidget->rowCount()+2);
+            ui->historicalDataTableWidget->setItem(trainingPass,0,firstRowItem);
+
+
+            for(uint i = 0;i<savedTopology.size();i++)
+            {
+                QTableWidgetItem *fillFirstRowItem = new QTableWidgetItem;
+                fillFirstRowItem->setText(QString::number(savedTopology.at(i)));
+                ui->historicalDataTableWidget->setItem(trainingPass,i+1,fillFirstRowItem);
+            }
+            trainingPass++;
+
+            //figure out how many inputs and output exist per line
+            getline(dbFile,checkStr,'\n');
+            stringstream ssIOLine(checkStr);
+            while(getline(ssIOLine,checkStr,','))
+            {
+                QTableWidgetItem *ioCellValues = new QTableWidgetItem;
+                //checkStr.erase(remove_if(checkStr.begin(), checkStr.end(), isspace), checkStr.end());
+                if(checkStr=="I")
+                {
+                    ioCellValues->setText("I");
+                    headerList.push_back("Input");
+                    ui->historicalDataTableWidget->setItem(trainingPass,inputSize,ioCellValues);
+                    inputSize++;
+                }
+                else if(checkStr=="O")
+                {
+                    ioCellValues->setText("O");
+                    headerList.push_back("Output");
+                    if(inputSize + outputSize + 1 > savedTopology.size() + 2)
+                    {
+                        ui->historicalDataTableWidget->setColumnCount(inputSize + outputSize + 1);
+                    }
+                    ui->historicalDataTableWidget->setItem(trainingPass,inputSize+outputSize,ioCellValues);
+                    outputSize++;
+                }
+            }
+
+            ui->historicalDataTableWidget->setHorizontalHeaderLabels(headerList);
+
+            //figure out how many inputs and output exist per line
+            vector<double> lineVals;
+            deviceInputs.clear();
+            deviceOutputs.clear();
+
+            try
+            {
+                int cycleIn;
+
+
+                while(getline(dbFile,checkStr))
+                {
+
+                    trainingPass++;
+                    ui->historicalDataTableWidget->setRowCount(trainingPass+1);
+                    stringstream ssFillLine(checkStr);
+                    lineVals.clear();
+
+                    for(cycleIn = 0;cycleIn < inputSize;cycleIn++)
+                    {
+                        getline(ssFillLine, checkStr,',');
+                        lineVals.push_back(stod(checkStr,&sz));
+                        QTableWidgetItem *inputFillValues = new QTableWidgetItem;
+                        QString fillString = QString::number(stod(checkStr,&sz));
+                        inputFillValues->setText(fillString);
+                        ui->historicalDataTableWidget->setItem(trainingPass,cycleIn,inputFillValues);
+                    }
+                    deviceInputs.push_back(lineVals);
+                    lineVals.clear();
+
+                    for(int cycleOut = cycleIn;cycleOut < outputSize + cycleIn;cycleOut++)
+                    {
+                        getline(ssFillLine, checkStr,',');
+                        lineVals.push_back(stod(checkStr,&sz));
+                        QTableWidgetItem *outputFillValues = new QTableWidgetItem;
+                        QString fillString = QString::number(stod(checkStr,&sz));
+                        outputFillValues->setText(fillString);
+                        ui->historicalDataTableWidget->setItem(trainingPass,cycleOut,outputFillValues);
+                    }
+                    deviceOutputs.push_back(lineVals);
+                }
+            }
+            catch(std::ifstream::failure e)
+            {
+                std::cerr << "Exception happened: " << e.what() << "\n"
+                  << "Error bits are: "
+                  << "\nfailbit: " << dbFile.fail()
+                  << "\neofbit: " << dbFile.eof()
+                  << "\nbadbit: " << dbFile.bad() << std::endl;
+
+                cout << "Finished File \n";
+                dbFile.close();
+            }
+
+
+            dbLoaded = true;
+
        }
        else if(extensionType == "json")
        {
@@ -292,7 +561,10 @@ void runtime_Window::dbSourceConfigured(sourceInformation receivedSourceConfig)
 
 void runtime_Window::on_convertDbButton_clicked()
 {
+    //note that the number of inputs and outputs must remain constant, even if a null identifier is issued
+    //otherwise things will get a tad fucked
     dbConvertOccurred = true;
+    dbLoaded = false;
 
     ui->saveToFileChkBox->setEnabled(true);
     ui->saveToFileChkBox->setChecked(false);
@@ -309,27 +581,79 @@ void runtime_Window::on_convertDbButton_clicked()
                     ui->historicalDataTableWidget->setColumnCount(3);
                     ui->historicalDataTableWidget->setRowCount(deviceInputs.size());
                     ui->historicalDataTableWidget->setHorizontalHeaderLabels(QString("Input 1;Input 2;Output").split(";"));
+                    uint columnFill =0;
+                    int largestColumn = 0;
+                    uint inCycle = 0;
 
-                    for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+                    if(savedTopology.size() + 2 > deviceInputs.size() + deviceOutputs.size())
                     {
-                        ui->historicalDataTableWidget->setColumnCount(deviceInputs.at(columnFill).size()+ deviceOutputs.at(columnFill).size());
+                        ui->historicalDataTableWidget->setColumnCount(savedTopology.size() + 2);
+                    }
+                    else
+                    {
+                        ui->historicalDataTableWidget->setColumnCount(deviceInputs.size() + deviceOutputs.size());
+                    }
+
+
+                    //we up by one to account for denoting topology
+                    for(uint topologyCycle = 0;topologyCycle < savedTopology.size()+1;topologyCycle++)
+                    {
+                        QTableWidgetItem *csvTopDefineLine = new QTableWidgetItem;
+                        if(topologyCycle == 0)
+                        {
+                            csvTopDefineLine->setText("topology:");
+                            ui->historicalDataTableWidget->setItem(columnFill,topologyCycle,csvTopDefineLine);
+                        }
+                        else
+                        {
+                            csvTopDefineLine->setText(QString::number(savedTopology.at(topologyCycle-1)));
+                            ui->historicalDataTableWidget->setItem(columnFill,topologyCycle,csvTopDefineLine);
+                        }
+                    }
+
+                    columnFill++;
+                    for(inCycle = 0;inCycle < deviceInputs.at(0).size();inCycle++)
+                    {
+                        QTableWidgetItem *csvInDefineLine = new QTableWidgetItem;
+
+                        csvInDefineLine->setText("I");
+                        ui->historicalDataTableWidget->setItem(columnFill,inCycle,csvInDefineLine);
+                    }
+
+                    for(uint outCycle = inCycle;outCycle < deviceOutputs.at(0).size()+inCycle;outCycle++)
+                    {
+                        QTableWidgetItem *csvOutDefineLine = new QTableWidgetItem;
+
+                        csvOutDefineLine->setText("O");
+                        ui->historicalDataTableWidget->setItem(columnFill,outCycle,csvOutDefineLine);
+                    }
+                    columnFill++;
+
+                    for(columnFill;columnFill<deviceInputs.size()+2;columnFill++)
+                    {
+                        if(largestColumn < deviceInputs.at(columnFill-2).size()+ deviceOutputs.at(columnFill-2).size())
+                        {
+                            largestColumn = deviceInputs.at(columnFill-2).size()+ deviceOutputs.at(columnFill-2).size();
+                        }
+
+                        ui->historicalDataTableWidget->setColumnCount(largestColumn);
 
                         uint inputRowFill = 0;
 
-                        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+                        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill-2).size();inputRowFill++)
                         {
                             QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
 
-                            csvInputTableItems->setText(QString::number(deviceInputs.at(columnFill).at(inputRowFill)));
+                            csvInputTableItems->setText(QString::number(deviceInputs.at(columnFill-2).at(inputRowFill)));
                             ui->historicalDataTableWidget->setItem(columnFill,inputRowFill,csvInputTableItems);
                         }
                         uint outputRowFill;
 
-                        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+                        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill-2).size()+inputRowFill;outputRowFill++)
                         {
                             QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
 
-                            csvOutputTableItems->setText(QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)));
+                            csvOutputTableItems->setText(QString::number(deviceOutputs.at(columnFill-2).at(outputRowFill-inputRowFill)));
                             ui->historicalDataTableWidget->setItem(columnFill,outputRowFill,csvOutputTableItems);
                         }
                     }
@@ -340,11 +664,102 @@ void runtime_Window::on_convertDbButton_clicked()
                     ui->historicalDataTableWidget->clear();
                 }
                 break;
+            case 2:
+                {
+
+                }
+                break;
             }
         }
         else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "csv")
         {
+            switch (ui->convertComboBox->currentIndex())
+            {
+            case 0:
+                {
+                    ui->historicalDataTableWidget->clearContents();
+                    ui->historicalDataTableWidget->setColumnCount(deviceInputs.at(0).size() + deviceOutputs.at(0).size());
+                    ui->historicalDataTableWidget->setRowCount(deviceInputs.size());
 
+                    //this only accounts for consistent numbers of inputs and outputs
+                    QStringList headerList;
+                    for(uint i = 0;i<deviceInputs.at(0).size();i++)
+                    {
+                        //headerList += "Input " + QString::number(i);
+                        headerList.push_back("Input " + QString::number(i));
+                    }
+
+                    for(uint i = 0;i<deviceOutputs.at(0).size();i++)
+                    {
+                        //headerList += "Output " + QString::number(i);
+                        headerList.push_back("Output " + QString::number(i));
+                    }
+
+                    uint trainingPass = 0;
+
+                    ui->historicalDataTableWidget->setHorizontalHeaderLabels(headerList);
+
+                    QTableWidgetItem *firstRowItem = new QTableWidgetItem;
+                    firstRowItem->setText("topology:");
+                    ui->historicalDataTableWidget->setColumnCount(savedTopology.size() + 1);
+                    ui->historicalDataTableWidget->setRowCount(ui->historicalDataTableWidget->rowCount()+2);
+                    ui->historicalDataTableWidget->setItem(trainingPass,0,firstRowItem);
+
+
+                    for(uint i = 0;i<savedTopology.size();i++)
+                    {
+                        QTableWidgetItem *fillFirstRowItem = new QTableWidgetItem;
+                        fillFirstRowItem->setText(QString::number(savedTopology.at(i)));
+                        ui->historicalDataTableWidget->setItem(trainingPass,i+1,fillFirstRowItem);
+                    }
+                    trainingPass++;
+
+                    int ioPullPass = 0;
+
+                    ui->historicalDataTableWidget->setColumnCount(savedTopology.size() + 1);
+
+                    while(ioPullPass < deviceInputs.size())
+                    {
+                        ui->historicalDataTableWidget->setRowCount(trainingPass+2);
+
+                        QTableWidgetItem *csvInputLabelItem = new QTableWidgetItem;
+                        csvInputLabelItem->setText("in:");
+                        ui->historicalDataTableWidget->setItem(trainingPass,0,csvInputLabelItem);
+                        for(uint inputRowFill = 1;inputRowFill<deviceInputs.at(ioPullPass).size()+1;inputRowFill++)
+                        {
+                            QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+                            csvInputTableItems->setText(QString::number(deviceInputs.at(ioPullPass).at(inputRowFill-1)));
+                            ui->historicalDataTableWidget->setItem(trainingPass,inputRowFill,csvInputTableItems);
+                        }
+
+                        trainingPass++;
+                        QTableWidgetItem *csvOutputLabelItem = new QTableWidgetItem;
+                        csvOutputLabelItem->setText("out:");
+                        ui->historicalDataTableWidget->setItem(trainingPass,0,csvOutputLabelItem);
+                        for(uint outputRowFill = 1;outputRowFill<deviceOutputs.at(ioPullPass).size()+1;outputRowFill++)
+                        {
+                            QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+                            csvOutputTableItems->setText(QString::number(deviceInputs.at(ioPullPass).at(outputRowFill-1)));
+                            ui->historicalDataTableWidget->setItem(trainingPass,outputRowFill,csvOutputTableItems);
+                        }
+                        trainingPass++;
+                        ioPullPass++;
+
+                    }
+
+                }
+                break;
+            case 1:
+                {
+                    ui->historicalDataTableWidget->clear();
+                }
+                break;
+            case 2:
+                {
+
+                }
+                break;
+            }
         }
         else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "json")
         {
@@ -352,6 +767,7 @@ void runtime_Window::on_convertDbButton_clicked()
         }
     }
 
+    dbLoaded = true;
 }
 
 void runtime_Window::on_controlSelectComboBox_currentIndexChanged(int index)
@@ -869,11 +1285,12 @@ void runtime_Window::on_mainMenuBtn_clicked()
 
 void runtime_Window::on_manualUpdateButton_clicked()
 {
-    updateDatabase();
+    updateDatabase(true,0);
 }
 
 void runtime_Window::on_historicalDataTableWidget_cellChanged(int row, int column)
 {
+
     if(dbLoaded)
     {
         //deviceInputs/Outputs position of stored data must be offset due to
@@ -937,12 +1354,42 @@ void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
                                 initialDirectory,
                                 QFileDialog::ShowDirsOnly
                                 | QFileDialog::DontResolveSymlinks);
+                    QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
+
+                    defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
 
                     dbInformation.database = defaultName;
-
+                    //start writing the file with the default name here
                     ofstream updatedFile;
 
                     updatedFile.open(defaultName.toStdString());
+
+                    //write the topology here
+                    for(uint topologyCycle = 0;topologyCycle < savedTopology.size()+1;topologyCycle++)
+                    {
+                        if(topologyCycle == 0)
+                        {
+                            updatedFile << "topology: ,";
+                        }
+                        else
+                        {
+                            updatedFile << QString::number(savedTopology.at(topologyCycle-1)).toStdString() + ",";
+                        }
+                    }
+                    updatedFile << endl;
+
+                    //denote input and output status here
+                    uint inCycle;
+                    for(inCycle = 0;inCycle < deviceInputs.at(0).size();inCycle++)
+                    {
+                        updatedFile << "I,";
+                    }
+
+                    for(uint outCycle = inCycle;outCycle < deviceOutputs.at(0).size()+inCycle;outCycle++)
+                    {
+                        updatedFile << "O,";
+                    }
+                    updatedFile << endl;
 
                     for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
                     {
@@ -1014,7 +1461,113 @@ void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
             }
             else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "csv")
             {
+                switch (ui->convertComboBox->currentIndex())
+                {
+                case 0:
+                    {
+                    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".txt";
+                    QString initialDirectory;
 
+                    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                    {
+                        initialDirectory += directoryList.at(dirCycle) + "/";
+                    }
+
+                    QString savedir = QFileDialog::getExistingDirectory(
+                                this, tr("Open Directory"),
+                                initialDirectory,
+                                QFileDialog::ShowDirsOnly
+                                | QFileDialog::DontResolveSymlinks);
+
+                    QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
+
+                    defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
+
+                    dbInformation.database = defaultName;
+
+                    ofstream updatedFile;
+
+                    updatedFile.open(defaultName.toStdString());
+
+                    //write the topology here
+                    updatedFile << "topology: ";
+                    for(uint topologyCycle = 0;topologyCycle < savedTopology.size();topologyCycle++)
+                    {
+                        updatedFile << QString::number(savedTopology.at(topologyCycle)).toStdString() + " ";
+                    }
+                    updatedFile << endl;
+
+                    for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+                    {
+
+                        uint inputRowFill = 0;
+
+                        updatedFile << "in: ";
+                        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+                        {
+                            QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+
+                            updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + " ";
+                        }
+                        uint outputRowFill;
+                        updatedFile << endl;
+
+                        updatedFile << "out: ";
+                        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+                        {
+                            QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+
+                            updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + " ";
+                        }
+                        updatedFile << endl;
+                    }
+
+                    updatedFile.close();
+
+                    }
+                    break;
+                case 1:
+                    {
+                    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".csv";
+                    QString initialDirectory;
+
+                    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                    {
+                        initialDirectory += directoryList.at(dirCycle) + "/";
+                    }
+
+                    QString savedir = QFileDialog::getExistingDirectory(
+                                this, tr("Open Directory"),
+                                initialDirectory,
+                                QFileDialog::ShowDirsOnly
+                                | QFileDialog::DontResolveSymlinks);
+
+                    dbInformation.database = defaultName;
+                    }
+                    break;
+                case 2:
+                {
+                    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".json";
+                    QString initialDirectory;
+
+                    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                    {
+                        initialDirectory += directoryList.at(dirCycle) + "/";
+                    }
+
+                    QString savedir = QFileDialog::getExistingDirectory(
+                                this, tr("Open Directory"),
+                                initialDirectory,
+                                QFileDialog::ShowDirsOnly
+                                | QFileDialog::DontResolveSymlinks);
+
+                    dbInformation.database = defaultName;
+                }
+                    break;
+                }
             }
             else if(dbInformation.database.split(".",QString::SkipEmptyParts).at(1) == "json")
             {

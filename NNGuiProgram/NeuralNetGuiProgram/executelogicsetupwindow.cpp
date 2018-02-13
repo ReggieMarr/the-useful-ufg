@@ -73,7 +73,8 @@ void executeLogicSetupWindow::OnComboIndexChanged(const QString& text)
     if (combo)
     {
 
-        switch (combo->property("column").toInt()) {
+        switch (combo->property("column").toInt())
+        {
         case 0:
             setupLogic.inputType.push_back(combo->currentIndex());
             break;
@@ -91,10 +92,6 @@ void executeLogicSetupWindow::OnComboIndexChanged(const QString& text)
             setupLogic.outputType.push_back(combo->currentIndex());
             break;
         }
-
-
-//        qDebug() << "row: " << combo->property("row").toInt();
-//        qDebug() << "column: " << combo->property("column").toInt();
     }
 }
 
