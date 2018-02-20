@@ -92,6 +92,8 @@ private slots:
 
     void on_saveToFileChkBox_stateChanged(int arg1);
 
+    void on_dynamicObjectSetupBtn_clicked();
+
 private:
     //Browser * m_model;
     void releaseTcpModbus();

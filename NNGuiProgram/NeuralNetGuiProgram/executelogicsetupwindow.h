@@ -2,20 +2,20 @@
 #define EXECUTELOGICSETUPWINDOW_H
 
 #include <QMainWindow>
+#include "controlobjectitemdelegate.h"
 
 namespace Ui {
 class executeLogicSetupWindow;
 }
 
-struct customLogicFlow
+struct customObject
 {
-    customLogicFlow() {}
+    customObject() {}
 
-    std::vector<int> inputType;
-    std::vector<int> comparisonType;
-    std::vector<double> valueA;
-    std::vector<double> valueB;
-    std::vector<int> outputType;
+    std::vector<int> inputType,outputType,comparisonType;
+    std::vector<double> valueA,valueB;
+    //std::vector<bool> comboElseIfMode,comboWhileMode,comboAndMode;
+
 };
 
 class executeLogicSetupWindow : public QMainWindow
@@ -26,7 +26,7 @@ public:
     explicit executeLogicSetupWindow(QWidget *parent = 0);
     ~executeLogicSetupWindow();
     void translateLogic(int inputType, int comparisonType, double valueA, double valueB);
-    customLogicFlow setupLogic;
+    customObject customObjectAttributes;
 
 private slots:
     void on_newRowButton_clicked();
@@ -37,8 +37,16 @@ private slots:
 
     void OnComboIndexChanged(const QString& text);
 
+    void OnTreeItemCBChanged(QStandardItem* testItem);
+
 private:
+    bool initialSetup;
+    unsigned methodIndex;
+    void addComboRow(int rowIndex);
     Ui::executeLogicSetupWindow *ui;
+    QStandardItemModel *treeModel;
+    controlObjectItemDelegate *treeItemDelegate;
+
 };
 
 #endif // EXECUTELOGICSETUPWINDOW_H

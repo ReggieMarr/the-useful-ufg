@@ -146,77 +146,10 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
     switch (dbType) {
     case 0:
     {
-
-    }
-    if(!tableOnly)
-    {
-    QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
-    QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".txt";
-    QString initialDirectory;
-
-    for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
-    {
-        initialDirectory += directoryList.at(dirCycle) + "/";
-    }
-
-    QString savedir = QFileDialog::getExistingDirectory(
-                this, tr("Open Directory"),
-                initialDirectory,
-                QFileDialog::ShowDirsOnly
-                | QFileDialog::DontResolveSymlinks);
-
-    QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
-
-    defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
-
-    dbInformation.database = defaultName;
-
-    ofstream updatedFile;
-
-    updatedFile.open(defaultName.toStdString());
-
-    //write the topology here
-    updatedFile << "topology: ";
-    for(uint topologyCycle = 0;topologyCycle < savedTopology.size();topologyCycle++)
-    {
-        updatedFile << QString::number(savedTopology.at(topologyCycle)).toStdString() + " ";
-    }
-    updatedFile << endl;
-
-    for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
-    {
-
-        uint inputRowFill = 0;
-
-        updatedFile << "in: ";
-        for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
-        {
-            QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
-
-            updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + " ";
-        }
-        uint outputRowFill;
-        updatedFile << endl;
-
-        updatedFile << "out: ";
-        for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
-        {
-            QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
-
-            updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + " ";
-        }
-        updatedFile << endl;
-    }
-
-    updatedFile.close();
-
-    }
-        break;
-    case 1:
         if(!tableOnly)
         {
         QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
-        QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".csv";
+        QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".txt";
         QString initialDirectory;
 
         for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
@@ -229,40 +162,22 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
                     initialDirectory,
                     QFileDialog::ShowDirsOnly
                     | QFileDialog::DontResolveSymlinks);
+
         QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
 
         defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
 
         dbInformation.database = defaultName;
-        //start writing the file with the default name here
+
         ofstream updatedFile;
 
         updatedFile.open(defaultName.toStdString());
 
         //write the topology here
-        for(uint topologyCycle = 0;topologyCycle < savedTopology.size()+1;topologyCycle++)
+        updatedFile << "topology: ";
+        for(uint topologyCycle = 0;topologyCycle < savedTopology.size();topologyCycle++)
         {
-            if(topologyCycle == 0)
-            {
-                updatedFile << "topology: ,";
-            }
-            else
-            {
-                updatedFile << QString::number(savedTopology.at(topologyCycle-1)).toStdString() + ",";
-            }
-        }
-        updatedFile << endl;
-
-        //denote input and output status here
-        uint inCycle;
-        for(inCycle = 0;inCycle < deviceInputs.at(0).size();inCycle++)
-        {
-            updatedFile << "I,";
-        }
-
-        for(uint outCycle = inCycle;outCycle < deviceOutputs.at(0).size()+inCycle;outCycle++)
-        {
-            updatedFile << "O,";
+            updatedFile << QString::number(savedTopology.at(topologyCycle)).toStdString() + " ";
         }
         updatedFile << endl;
 
@@ -271,19 +186,22 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
 
             uint inputRowFill = 0;
 
+            updatedFile << "in: ";
             for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
             {
                 QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
 
-                updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + ",";
+                updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + " ";
             }
             uint outputRowFill;
+            updatedFile << endl;
 
+            updatedFile << "out: ";
             for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
             {
                 QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
 
-                updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + ",";
+                updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + " ";
             }
             updatedFile << endl;
         }
@@ -291,12 +209,14 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
         updatedFile.close();
 
         }
+    }
         break;
-    case 2:
-        if(!tableOnly)
+    case 1:
         {
+            if(!tableOnly)
+            {
             QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
-            QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".json";
+            QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".csv";
             QString initialDirectory;
 
             for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
@@ -309,8 +229,91 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
                         initialDirectory,
                         QFileDialog::ShowDirsOnly
                         | QFileDialog::DontResolveSymlinks);
+            QStringList nameBreakdown = defaultName.split("/",QString::SkipEmptyParts);
+
+            defaultName = savedir + "/" + nameBreakdown.at(nameBreakdown.size()-1);
 
             dbInformation.database = defaultName;
+            //start writing the file with the default name here
+            ofstream updatedFile;
+
+            updatedFile.open(defaultName.toStdString());
+
+            //write the topology here
+            for(uint topologyCycle = 0;topologyCycle < savedTopology.size()+1;topologyCycle++)
+            {
+                if(topologyCycle == 0)
+                {
+                    updatedFile << "topology: ,";
+                }
+                else
+                {
+                    updatedFile << QString::number(savedTopology.at(topologyCycle-1)).toStdString() + ",";
+                }
+            }
+            updatedFile << endl;
+
+            //denote input and output status here
+            uint inCycle;
+            for(inCycle = 0;inCycle < deviceInputs.at(0).size();inCycle++)
+            {
+                updatedFile << "I,";
+            }
+
+            for(uint outCycle = inCycle;outCycle < deviceOutputs.at(0).size()+inCycle;outCycle++)
+            {
+                updatedFile << "O,";
+            }
+            updatedFile << endl;
+
+            for(uint columnFill =0;columnFill<deviceInputs.size();columnFill++)
+            {
+
+                uint inputRowFill = 0;
+
+                for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
+                {
+                    QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+
+                    updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + ",";
+                }
+                uint outputRowFill;
+
+                for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
+                {
+                    QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+
+                    updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + ",";
+                }
+                updatedFile << endl;
+            }
+
+            updatedFile.close();
+
+            }
+        }
+        break;
+    case 2:
+        {
+            if(!tableOnly)
+            {
+                QStringList directoryList = dbInformation.database.split("/",QString::SkipEmptyParts);
+                QString defaultName = dbInformation.database.split(".",QString::SkipEmptyParts).at(0) + ".json";
+                QString initialDirectory;
+
+                for(uint dirCycle = 0;dirCycle < directoryList.size()-1;dirCycle++)
+                {
+                    initialDirectory += directoryList.at(dirCycle) + "/";
+                }
+
+                QString savedir = QFileDialog::getExistingDirectory(
+                            this, tr("Open Directory"),
+                            initialDirectory,
+                            QFileDialog::ShowDirsOnly
+                            | QFileDialog::DontResolveSymlinks);
+
+                dbInformation.database = defaultName;
+            }
         }
         break;
     default:
@@ -1576,4 +1579,10 @@ void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
         }
 
     }
+}
+
+void runtime_Window::on_dynamicObjectSetupBtn_clicked()
+{
+    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
+    newLogicSetup->show();
 }

@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     runtime_window.cpp \
     connectionwidget.cpp \
     datalogdialogwindow.cpp \
-    executelogicsetupwindow.cpp
+    executelogicsetupwindow.cpp \
+    controlobjectitemdelegate.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -49,7 +50,8 @@ HEADERS  += nnconfigwindow.h \
     runtime_window.h \
     connectionwidget.h \
     datalogdialogwindow.h \
-    executelogicsetupwindow.h
+    executelogicsetupwindow.h \
+    controlobjectitemdelegate.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
