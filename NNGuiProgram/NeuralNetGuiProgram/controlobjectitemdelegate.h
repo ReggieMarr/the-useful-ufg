@@ -25,9 +25,11 @@ public:
     void setEditorData(QWidget *editor, const QModelIndex &index) const;
     //this updates the model to be viewed
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
-
     //how an item knows where it needs to be and how big it should be
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+private slots:
+    void onComboBoxChanged();
 
 private:
     std::vector<std::string> Items;

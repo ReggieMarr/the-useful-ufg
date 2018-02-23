@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "controlobjectitemdelegate.h"
 
+
+
 namespace Ui {
 class executeLogicSetupWindow;
 }
@@ -39,6 +41,8 @@ private slots:
 
     void OnTreeItemCBChanged(QStandardItem* testItem);
 
+
+
 private:
     bool initialSetup;
     unsigned methodIndex;
@@ -46,6 +50,15 @@ private:
     Ui::executeLogicSetupWindow *ui;
     QStandardItemModel *treeModel;
     controlObjectItemDelegate *treeItemDelegate;
+
+    //all methods from editable treeview
+    void updateTreeView();
+    bool removeColumn();
+    void removeRow();
+    bool insertColumn();
+    void insertRow();
+    void insertChild();
+
 
 };
 

@@ -13,6 +13,7 @@
 #include "fstream"
 #include "qextserialenumerator.h"
 #include "executelogicsetupwindow.h"
+#include "custommethodconstructorwindow.h"
 
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
@@ -1326,8 +1327,10 @@ void runtime_Window::on_historicalDataTableWidget_cellChanged(int row, int colum
 
 void runtime_Window::on_autoUpdateConfigButton_clicked()
 {
-    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
-    newLogicSetup->show();
+//    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
+//    newLogicSetup->show();
+    customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow;
+    newMethodSetup->show();
 }
 
 void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
@@ -1583,6 +1586,8 @@ void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
 
 void runtime_Window::on_dynamicObjectSetupBtn_clicked()
 {
-    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
-    newLogicSetup->show();
+//    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
+//    newLogicSetup->show();
+    customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow;
+    newMethodSetup->show();
 }

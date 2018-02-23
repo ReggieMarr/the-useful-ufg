@@ -32,7 +32,11 @@ SOURCES += main.cpp\
     connectionwidget.cpp \
     datalogdialogwindow.cpp \
     executelogicsetupwindow.cpp \
-    controlobjectitemdelegate.cpp
+    controlobjectitemdelegate.cpp \
+    treemodel.cpp \
+    treeitem.cpp \
+    custommethodconstructorwindow.cpp \
+    controlmethodmanagement.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -51,7 +55,11 @@ HEADERS  += nnconfigwindow.h \
     connectionwidget.h \
     datalogdialogwindow.h \
     executelogicsetupwindow.h \
-    controlobjectitemdelegate.h
+    controlobjectitemdelegate.h \
+    treemodel.h \
+    treeitem.h \
+    custommethodconstructorwindow.h \
+    controlmethodmanagement.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
@@ -60,7 +68,8 @@ FORMS    += nnconfigwindow.ui \
     modbussetupwindow.ui \
     runtime_window.ui \
     datalogdialogwindow.ui \
-    executelogicsetupwindow.ui
+    executelogicsetupwindow.ui \
+    custommethodconstructorwindow.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \
@@ -82,5 +91,4 @@ LIBS += -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -lrt -latomi
 -luuid \
 -lboost_system -lboost_filesystem
 
-RESOURCES +=
 

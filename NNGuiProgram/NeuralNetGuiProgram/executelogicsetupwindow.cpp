@@ -3,6 +3,9 @@
 #include "QComboBox"
 #include "QDebug"
 
+#include <QFile>
+#include "treemodel.h"
+
 void executeLogicSetupWindow::addComboRow(int rowIndex)
 {
     int colIndex = 0;
@@ -95,15 +98,15 @@ executeLogicSetupWindow::executeLogicSetupWindow(QWidget *parent) :
     ui(new Ui::executeLogicSetupWindow)
 {
     ui->setupUi(this);
+    ui->logicSetupTableWidget->setVisible(false);
 
-    int maxRow = 3,maxCol = 2;
+    int maxRow = 1,maxCol = 4;
     treeModel = new QStandardItemModel(maxRow,maxCol,this);
     treeItemDelegate = new controlObjectItemDelegate(this);
 
     //tableView.setItemDelegateForColumn(1, delegate); // Column 0 can take any value, column 1 can only take values up to 8.
     ui->dynamicObjectTreeView->setModel(treeModel);
     ui->dynamicObjectTreeView->setItemDelegate(treeItemDelegate);
-
 
 
     for(int row = 0;row< maxRow;row++)
@@ -117,10 +120,8 @@ executeLogicSetupWindow::executeLogicSetupWindow(QWidget *parent) :
         }
     }
 
-
-    connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(OnTreeItemCBChanged(QStandardItem *)));
-
-
+    //connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(OnTreeItemCBChanged(QStandardItem *)));
+    connect(treeModel,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(OnTreeItemCBChanged(QStandardItem *)));
     ui->logicSetupTableWidget->setColumnCount(8);
     ui->logicSetupTableWidget->setRowCount(1);
     ui->logicSetupTableWidget->setHorizontalHeaderLabels(QString("Input Condition;Val A;Comparison;Val B;Reaction;Output Action").split(";"));
@@ -128,7 +129,6 @@ executeLogicSetupWindow::executeLogicSetupWindow(QWidget *parent) :
     methodIndex = 0;
 
     addComboRow(ui->logicSetupTableWidget->rowCount()-1);
-
 }
 
 executeLogicSetupWindow::~executeLogicSetupWindow()
@@ -137,26 +137,126 @@ executeLogicSetupWindow::~executeLogicSetupWindow()
 }
 
 
+void executeLogicSetupWindow::insertChild()
+{
+    QModelIndex index = ui->dynamicObjectTreeView->selectionModel()->currentIndex();
+    QAbstractItemModel *model = ui->dynamicObjectTreeView->model();
+
+    if (model->columnCount(index) == 0) {
+        if (!model->insertColumn(0, index))
+            return;
+    }
+
+    if (!model->insertRow(0, index))
+        return;
+
+    for (int column = 0; column < model->columnCount(index); ++column) {
+        QModelIndex child = model->index(0, column, index);
+        model->setData(child, QVariant("[No data]"), Qt::EditRole);
+        if (!model->headerData(column, Qt::Horizontal).isValid())
+            model->setHeaderData(column, Qt::Horizontal, QVariant("[No header]"), Qt::EditRole);
+    }
+
+    ui->dynamicObjectTreeView->selectionModel()->setCurrentIndex(model->index(0, 0, index),
+                                            QItemSelectionModel::ClearAndSelect);
+    updateTreeView();
+}
+
+bool executeLogicSetupWindow::insertColumn()
+{
+    QAbstractItemModel *model = ui->dynamicObjectTreeView->model();
+    int column = ui->dynamicObjectTreeView->selectionModel()->currentIndex().column();
+
+    // Insert a column in the parent item.
+    bool changed = model->insertColumn(column + 1);
+    if (changed)
+        model->setHeaderData(column + 1, Qt::Horizontal, QVariant("[No header]"), Qt::EditRole);
+
+    updateTreeView();
+
+    return changed;
+}
+
+void executeLogicSetupWindow::insertRow()
+{
+    QModelIndex index = ui->dynamicObjectTreeView->selectionModel()->currentIndex();
+    QAbstractItemModel *model = ui->dynamicObjectTreeView->model();
+
+    if (!model->insertRow(index.row()+1, index.parent()))
+        return;
+
+    updateTreeView();
+
+    for (int column = 0; column < model->columnCount(index.parent()); ++column) {
+        QModelIndex child = model->index(index.row()+1, column, index.parent());
+        model->setData(child, QVariant("[No data]"), Qt::EditRole);
+    }
+}
+
+bool executeLogicSetupWindow::removeColumn()
+{
+    QAbstractItemModel *model = ui->dynamicObjectTreeView->model();
+    int column = ui->dynamicObjectTreeView->selectionModel()->currentIndex().column();
+
+    // Insert columns in each child of the parent item.
+    bool changed = model->removeColumn(column);
+
+    if (changed)
+        updateTreeView();
+
+    return changed;
+}
+
+void executeLogicSetupWindow::removeRow()
+{
+    QModelIndex index = ui->dynamicObjectTreeView->selectionModel()->currentIndex();
+    QAbstractItemModel *model = ui->dynamicObjectTreeView->model();
+    if (model->removeRow(index.row(), index.parent()))
+        updateTreeView();
+}
+
+void executeLogicSetupWindow::updateTreeView()
+{
+    bool hasSelection = !ui->dynamicObjectTreeView->selectionModel()->selection().isEmpty();
+//    removeRowAction->setEnabled(hasSelection);
+//    removeColumnAction->setEnabled(hasSelection);
+
+    bool hasCurrent = ui->dynamicObjectTreeView->selectionModel()->currentIndex().isValid();
+//    insertRowAction->setEnabled(hasCurrent);
+//    insertColumnAction->setEnabled(hasCurrent);
+
+    if (hasCurrent) {
+        ui->dynamicObjectTreeView->closePersistentEditor(ui->dynamicObjectTreeView->selectionModel()->currentIndex());
+
+        int row = ui->dynamicObjectTreeView->selectionModel()->currentIndex().row();
+        int column = ui->dynamicObjectTreeView->selectionModel()->currentIndex().column();
+        if (ui->dynamicObjectTreeView->selectionModel()->currentIndex().parent().isValid())
+            statusBar()->showMessage(tr("Position: (%1,%2)").arg(row).arg(column));
+        else
+            statusBar()->showMessage(tr("Position: (%1,%2) in top level").arg(row).arg(column));
+    }
+}
+
 void executeLogicSetupWindow::OnTreeItemCBChanged(QStandardItem *testItem)
 {
-
-    QComboBox* combo = qobject_cast<QComboBox*>(sender());
-
-
-    QModelIndex testIndex = testItem->index();
-    qDebug() << testItem->index();
+//what I did
+//    QComboBox* combo = qobject_cast<QComboBox*>(sender());
+//    QModelIndex testIndex = testItem->index();
+//    qDebug() << testItem->index();
     int row = testItem->index().row();
     int col = testItem->index().column();
-    QVariant value = testItem->data();
 
-    //qDebug(testItem);
-    if (combo)
-    {
-        qDebug("It worked");
-    }
-    else
-    {
-        qDebug("Guess its fucked");
+    //what stackoverflow suggested
+    QVariant variant = testItem->data(Qt::UserRole+1);
+    if(variant.isValid()){
+        qDebug()<<variant.toInt();
+
+        int comboIndex = -1;
+
+        QStandardItem* child = new QStandardItem( tr("Child test") );
+
+        insertChild();
+        //testItem->appendRow(child);
     }
 }
 

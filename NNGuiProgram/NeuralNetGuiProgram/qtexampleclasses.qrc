@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>treeitem.cpp</file>
+        <file>treeitem.h</file>
+        <file>treemodel.cpp</file>
+        <file>treemodel.h</file>
+    </qresource>
+</RCC>

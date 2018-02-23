@@ -53,7 +53,14 @@
      <widget class="QTableWidget" name="logicSetupTableWidget"/>
     </item>
     <item row="0" column="0">
-     <widget class="QTreeView" name="dynamicObjectTreeView"/>
+     <widget class="QTreeView" name="dynamicObjectTreeView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
