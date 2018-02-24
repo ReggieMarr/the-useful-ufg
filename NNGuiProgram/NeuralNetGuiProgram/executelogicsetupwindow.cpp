@@ -1,10 +1,11 @@
 #include "executelogicsetupwindow.h"
 #include "ui_executelogicsetupwindow.h"
 #include "QComboBox"
+#include "QTreeView"
 #include "QDebug"
 
 #include <QFile>
-#include "treemodel.h"
+//#include "treemodel.h"
 
 void executeLogicSetupWindow::addComboRow(int rowIndex)
 {
@@ -100,7 +101,8 @@ executeLogicSetupWindow::executeLogicSetupWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->logicSetupTableWidget->setVisible(false);
 
-    int maxRow = 1,maxCol = 4;
+    int maxRow = 2,maxCol = 4;
+
     treeModel = new QStandardItemModel(maxRow,maxCol,this);
     treeItemDelegate = new controlObjectItemDelegate(this);
 
@@ -109,19 +111,25 @@ executeLogicSetupWindow::executeLogicSetupWindow(QWidget *parent) :
     ui->dynamicObjectTreeView->setItemDelegate(treeItemDelegate);
 
 
-    for(int row = 0;row< maxRow;row++)
+    QModelIndex rootIndex = treeModel->index(0,1,QModelIndex());
+    ui->dynamicObjectTreeView->setRootIndex(rootIndex);
+    QStandardItem *rootItem;
+    treeModel->setItem(0,0,rootItem);
+
+
+    for(int row = 1;row< maxRow;row++)
     {
         for(int col = 0;col< maxCol;col++)
         {
             QModelIndex index = treeModel->index(row,col,QModelIndex());
-            //int value = (row+1) * (col+1);
-            //treeModel->setData(index,QVariant(value),Qt::EditRole);
+
             treeModel->setData(index,"Click to Edit",Qt::EditRole);
         }
     }
 
-    //connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(OnTreeItemCBChanged(QStandardItem *)));
-    connect(treeModel,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(OnTreeItemCBChanged(QStandardItem *)));
+    connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(OnTreeItemCBChanged(QStandardItem *)));
+
+    //connect(treeModel,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),this,SLOT(OnTreeDataChanged(QModelIndex,QModelIndex,QVector<int>)));
     ui->logicSetupTableWidget->setColumnCount(8);
     ui->logicSetupTableWidget->setRowCount(1);
     ui->logicSetupTableWidget->setHorizontalHeaderLabels(QString("Input Condition;Val A;Comparison;Val B;Reaction;Output Action").split(";"));
@@ -236,6 +244,17 @@ void executeLogicSetupWindow::updateTreeView()
             statusBar()->showMessage(tr("Position: (%1,%2) in top level").arg(row).arg(column));
     }
 }
+
+void executeLogicSetupWindow::OnTreeDataChanged(QModelIndex indexone,QModelIndex indextwo,QVector<int> somevector)
+{
+//what I did
+//    QComboBox* combo = qobject_cast<QComboBox*>(sender());
+//    QModelIndex testIndex = testItem->index();
+    qDebug() << "testItem->index();";
+
+}
+
+
 
 void executeLogicSetupWindow::OnTreeItemCBChanged(QStandardItem *testItem)
 {

@@ -332,6 +332,97 @@ void  ExecuteNeuralNet::TrainNN(vector<double> &smoothedError,vector<vector<doub
 
 
 }
+
+void  ExecuteNeuralNet::MethodRunNN(vector<double> &smoothedError,vector<vector<double>> &targetInput,vector<vector<double>> &targetOutput,
+                                    vector<vector<double> > &NNOutput,double learningRate,double momentum, float memoryRange, string filename,
+                                    int selectedFunction, vector<vector<Layer>> &NNModelLayers, runtimeModel receivedModel)
+{
+    vector<double> allAverageError;
+    allAverageError.clear();
+
+    vector<Layer> CurrentModel;
+    vector<vector<Layer>> AllModels;
+
+    const string dataFile = filename;//.toStdString();//"/home/reggie/Project_Apps/NeuralNet_Still/StillControlNNAlgorithm/David_Miller_NN/MakingDMData/trainingdata.txt";
+
+    TrainingData trainData(dataFile);
+
+    //cout << "Got training data \n";
+    // e.g., { 3, 2, 1 }
+    vector<unsigned> topology;
+    trainData.getTopology(topology);
+
+    //this is where we set the topology and since
+    //this is a XOR net we use 2,4,1
+//    topology.push_back(2);
+//    topology.push_back(4);
+//    topology.push_back(1);
+
+    CustomNN myNet(topology,receivedModel);
+//    Neuron NNObj;
+//    NNObj.eta = learningRate;
+//    NNObj.alpha = momentum;
+//      momentumToAlpha = momentum;
+//      learnToEta = learningRate;
+
+//    Neuron neuronObj;
+//    neuronObj.eta = learningRate;
+//    neuronObj.alpha = momentum;
+
+    NNOutput.clear(); targetOutput.clear();
+    vector<double> inputVals, currentTargetVals, currentResultVals;
+    int trainingPass = 0;
+
+
+    while (!trainData.isEof()) {
+        ++trainingPass;
+        //cout << endl << "Pass " << trainingPass;
+
+        // Get new input data and feed it forward:
+        if (trainData.getNextInputs(inputVals) != topology[0]) {
+            //cout << "\n you broke it, it went to this " << trainData.getNextInputs(inputVals) << endl;
+            break;
+        }
+        //showVectorVals(": Inputs:", inputVals);
+        myNet.Feedforward(inputVals,selectedFunction);
+
+        // Collect the net's actual output results:
+        //not sure how this is supposed to work but it really doesnt send the correct
+        //outputs
+        myNet.GetResults(currentResultVals);
+
+        //showVectorVals("Outputs:", resultVals);
+
+        // Train the net what the outputs should have been:
+        trainData.getTargetOutputs(currentTargetVals);
+        targetOutput.push_back(currentTargetVals);
+        //showVectorVals("Targets:", targetVals);
+        assert(currentTargetVals.size() == topology.back());
+
+        //myNet.BackPropogation(currentTargetVals,learningRate,momentum,memoryRange,selectedFunction);
+
+        CurrentModel.clear();
+        CurrentModel = myNet.m_layers;
+
+        NNOutput.push_back(currentResultVals);
+        // Report how well the training is working, average over recent samples:
+        //cout << "Net recent average error: "
+                //<< myNet.getRecentAverageError() << endl;
+        allAverageError.push_back(myNet.getRecentAverageError());
+
+        AllModels.push_back(CurrentModel);
+    }
+
+    //cout << endl << "Done" << endl;
+
+    NNModelLayers = AllModels;
+    smoothedError.clear();
+    smoothedError = allAverageError;
+    //return allAverageError;
+    //return a.exec();
+}
+
+
 void  ExecuteNeuralNet::RunNN(vector<double> &smoothedError, vector<vector<double>> &targetOutput, vector<vector<double> > &NNOutput, double learningRate,
                                         double momentum, float memoryRange, string filename,
                                         int selectedFunction, bool mySQLMode, vector<vector<Layer>> &NNModelLayers, runtimeModel receivedModel)

@@ -8,6 +8,8 @@
 
 
 Q_DECLARE_METATYPE(QTreeWidgetItem*)
+Q_DECLARE_METATYPE(QStackedWidget*)
+Q_DECLARE_METATYPE(QFrame*)
 
 customMethodConstructorWindow::customMethodConstructorWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -53,9 +55,11 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent,QTreeW
     {
         QTreeWidgetItem *childItem = new QTreeWidgetItem(itemParent);
 
-        QVariant itemParentVariant,widgetParentVarient;
+
+
+        QVariant childItemVariant,widgetParentVarient;
         widgetParentVarient.setValue(widgetParent);
-        itemParentVariant.setValue(itemParent);
+        childItemVariant.setValue(childItem);
         uint cycleSetup;
         for(cycleSetup = 0;cycleSetup < methodBlocks.at(rowType).size()+2;cycleSetup++)
         {
@@ -66,49 +70,71 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent,QTreeW
                 itemComboBox->setProperty("row", 0);
                 itemComboBox->setProperty("column",cycleSetup);
                 itemComboBox->setProperty("widgetParent",widgetParentVarient);
-                //itemComboBox->setProperty("itemParent",itemParentVariant);
+                itemComboBox->setProperty("childItem",childItemVariant);
                 itemComboBox->addItems(methodBlocks.at(0).at(cycleSetup));
                 QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
                 QLineEdit *itemLineEdit = new QLineEdit;
                 QPushButton *itemButton = new QPushButton;
                 itemButton->setText("Reset");
-                QStackedWidget *masterItemWidget = new QStackedWidget;
+                QComboBox *timeComboBox = new QComboBox;
+                timeComboBox->setProperty("rowType", rowType);
+                timeComboBox->setProperty("row", 0);
+                timeComboBox->setProperty("column",cycleSetup);
+                timeComboBox->setProperty("widgetParent",widgetParentVarient);
+                timeComboBox->setProperty("childItem",childItemVariant);
+                timeComboBox->addItems(QString("Seconds;MilliSeconds;Reset").split(";"));
+                QFrame *stackFrame = new QFrame;
+                QStackedWidget *masterItemWidget = new QStackedWidget(stackFrame);
                 masterItemWidget->addWidget(itemLineEdit);
                 masterItemWidget->addWidget(itemComboBox);
                 masterItemWidget->addWidget(itemButton);
+                masterItemWidget->addWidget(timeComboBox);
                 masterItemWidget->setCurrentIndex(1);
                 QVariant stackParent;
                 stackParent.setValue(masterItemWidget);
                 itemComboBox->setProperty("stackParent",stackParent);
+                itemComboBox->setProperty("cycleSetupIT",cycleSetup);
+                QVariant frameVariant;
+                frameVariant.setValue(stackFrame);
+                childItem->setData(cycleSetup,Qt::UserRole,stackParent);
+                //stackWidgetList.push_back(stackParent);
                 widgetParent->setItemWidget(childItem,cycleSetup,masterItemWidget);
                 itemParent->addChild(childItem);
             }
             else
             {
-                QComboBox *itemComboBox = new QComboBox;
-                itemComboBox->setProperty("rowType", rowType);
-                itemComboBox->setProperty("row", 0);
-                itemComboBox->setProperty("column",cycleSetup);
-                itemComboBox->setProperty("widgetParent",widgetParentVarient);
-                //itemComboBox->setProperty("itemParent",itemParentVariant);
-                itemComboBox->addItems(methodBlocks.at(0).at(methodBlocks.at(rowType).size() - 1));
-                QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
-                QLineEdit *itemLineEdit = new QLineEdit;
-                QPushButton *itemButton = new QPushButton;
-                itemButton->setText("Reset");
-                QStackedWidget *masterItemWidget = new QStackedWidget;
-                masterItemWidget->addWidget(itemLineEdit);
-                masterItemWidget->addWidget(itemComboBox);
-                masterItemWidget->addWidget(itemButton);
-                masterItemWidget->setCurrentIndex(1);
-                masterItemWidget->setVisible(false);
-                QVariant stackParent;
-                stackParent.setValue(masterItemWidget);
-                itemComboBox->setProperty("stackParent",stackParent);
-                widgetParent->setItemWidget(childItem,cycleSetup,masterItemWidget);
-                itemParent->addChild(childItem);
+//                QComboBox *itemComboBox = new QComboBox;
+//                itemComboBox->setProperty("rowType", rowType);
+//                itemComboBox->setProperty("row", 0);
+//                itemComboBox->setProperty("column",cycleSetup);
+//                itemComboBox->setProperty("widgetParent",widgetParentVarient);
+//                //itemComboBox->setProperty("itemParent",itemParentVariant);
+//                itemComboBox->addItems(methodBlocks.at(0).at(methodBlocks.at(rowType).size() - 1));
+//                QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
+//                QLineEdit *itemLineEdit = new QLineEdit;
+//                QPushButton *itemButton = new QPushButton;
+//                itemButton->setText("Reset");
+//                QStackedWidget *masterItemWidget = new QStackedWidget;
+//                masterItemWidget->addWidget(itemLineEdit);
+//                masterItemWidget->addWidget(itemComboBox);
+//                masterItemWidget->addWidget(itemButton);
+//                masterItemWidget->setCurrentIndex(1);
+//                masterItemWidget->setVisible(false);
+//                QVariant stackParent;
+//                stackParent.setValue(masterItemWidget);
+//                itemComboBox->setProperty("stackParent",stackParent);
+//                widgetParent->setItemWidget(childItem,cycleSetup,masterItemWidget);
+//                widgetParent->itemWidget(childItem,cycleSetup)->setVisible(false);
+//                itemParent->addChild(childItem);
             }
 
+//            QVariant checkVar;
+//            for(int i = 0; i < methodBlocks.at(rowType).size();i++)
+//            {
+//                checkVar= childItem->data(i,Qt::UserRole);
+//            }
+
+            //childItem->setData(0,Qt::UserRole,stackWidgetList);
         }
 
 
@@ -136,6 +162,8 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent,QTreeW
         widgetParent->setItemWidget(childItem,1,item1ComboBox);
         itemParent->addChild(childItem);
     }
+
+
 }
 
 void customMethodConstructorWindow::AddRoot(QStringList rootNames)
@@ -197,26 +225,103 @@ void customMethodConstructorWindow::OnComboIndexChanged(const QString& text)
                 break;
             case 1:
             {
-                if(combo->currentIndex() != 0)
+                switch (combo->currentIndex()) {
+                case 0:
                 {
-                    combo->setEditable(true);
+
+                }
+                    break;
+                case 1:
+                {
+
+                }
+                    break;
+                case 2:
+                {
+                    //combo->setEditable(true);
                     QStackedWidget *itemMaster = combo->property("stackParent").value<QStackedWidget*>();
                     itemMaster->setCurrentIndex(0);
-
                     QTreeWidget *widgetParent = combo->property("widgetParent").value<QTreeWidget*>();
 
-                    QTreeWidgetItem *parentItem = combo->property("itemParent").value<QTreeWidgetItem*>();
-                    QTreeWidgetItem *childItem = new QTreeWidgetItem(parentItem);
-                    QObjectList objList = widgetParent->children();
-                    int num = objList.size();
+                    //QTreeWidgetItem *parentItem = combo->property("itemParent").value<QTreeWidgetItem*>();
+                    QTreeWidgetItem *childItem = combo->property("childItem").value<QTreeWidgetItem*>();//new QTreeWidgetItem(parentItem);
+                    QTreeWidgetItem *parentItem = childItem->parent();
 
-                    widgetParent->itemWidget(childItem,combo->property("column").toInt());
-                    //int index = parentItem->indexOfChild(childItem);
-                    //QString testthing = parentItem->whatsThis(index);
-//                    QTextEdit *textItemEdit = new QTextEdit;
-//                    //QObject::connect(item1ComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
-//                    ui->methodSetupTreeWidget->setItemWidget(childItem,2,textItemEdit);
+                    //QTreeWidgetItem *current = childItem;
+                    //QTreeWidgetItem *parent = current->parent();
+                    QTreeWidgetItem *nextSibling;
+                    if(parentItem){
+                      nextSibling =parentItem->child(parentItem->indexOfChild(childItem)+1);
+                    }
+                    else {
+                      QTreeWidget *treeWidget = childItem->treeWidget();
+                      nextSibling = treeWidget->topLevelItem(treeWidget->indexOfTopLevelItem(childItem)+1);
+                    }
+                    int childInd = parentItem->indexOfChild(childItem);
+                    int sibInd = parentItem->indexOfChild(nextSibling);
+                    int kidCount = childItem->childCount();
+
+//                    QVariant checkVar;
+//                    for(int i = 0; i < methodBlocks.at(0).size();i++)
+//                    {
+//                        checkVar= childItem->data(i,Qt::UserRole);
+//                    }
+                    //widgetParent->setpr
+                    //QFrame *frameObject = childItem->data(2,Qt::UserRole).value<QFrame*>();
+                    //QList<QVariant> stackList = childItem->data(0,Qt::UserRole).value<QList<QVariant>>();
+                    int cycleIT = combo->property("cycleSetupIT").toInt();
+                    QStackedWidget *itemFrameMaster = childItem->data(cycleIT+1,Qt::UserRole).value<QStackedWidget*>();//frameObject->findChild<QStackedWidget*>();
+                    if(itemFrameMaster)
+                    {
+                        itemFrameMaster->setCurrentIndex(3);
+                        qDebug() << "itemFrame Exists";
+
+                    }
+                    else
+                    {
+                        qDebug() << "itemFrame is NULL";
+                    }
+                    //QObjectList objList = widgetParent->children();
+                    //QObject itemObject = qobject_cast<QObject*>();
+                    //widgetParent->children().at(0)->children().at(2)->
+//                    QComboBox *itemComboBox = qobject_cast<QComboBox*>(widgetParent->itemWidget(childItem,childInd));
+//                    itemComboBox->setProperty("rowType", widgetParent->itemWidget(childItem,combo->property("column").toInt())->property("rowType").toInt());
+//                    itemComboBox->setProperty("row", 0);
+//                    itemComboBox->setProperty("column",cycleSetup);
+//                    itemComboBox->setProperty("widgetParent",widgetParentVarient);
+//                    //itemComboBox->setProperty("itemParent",itemParentVariant);
+//                    itemComboBox->addItems(methodBlocks.at(0).at(cycleSetup));
+
+//                    QStackedWidget *itemTimerMaster = itemComboBox->property("stackParent").value<QStackedWidget*>();
+
+//                    QComboBox *timerItemCB = qobject_cast<QComboBox*>(itemTimerMaster->widget(1));
+//                    timerItemCB->clear();
+//                    timerItemCB->addItems(QString("Seconds;MilliSeconds;Reset").split(";"));
+                    //FUCK I NEED TO MAKE A WHOLE FUCKING SERIES OF SLOTS HERE
+
+//                    widgetParent->setItemWidget(childItem,combo->property("column").toInt()+1,timerItemCB);
+//                    //parentItem->insertChild(combo->property("column").toInt(),childItem);
+//                    QLineEdit *itemStaticVarLineEdit = new QLineEdit;
+//                    widgetParent->setItemWidget(childItem,combo->property("column").toInt()+3,itemStaticVarLineEdit);
+//                    //parentItem->insertChild(combo->property("column").toInt()+3,childItem);
+//                    QPushButton *itemPushButon = new QPushButton;
+//                    itemPushButon->setText("Reset");
+//                    widgetParent->setItemWidget(childItem,combo->property("column").toInt()+4,itemPushButon);
+//                    //parentItem->insertChild(combo->property("column").toInt()+4,childItem);
+
+//
                 }
+                    break;
+                }
+
+//                if(combo->currentIndex() != 0)
+//                {
+//                    int index = parentItem->indexOfChild(childItem);
+//                    QString testthing = parentItem->whatsThis(index);
+//                    QTextEdit *textItemEdit = new QTextEdit;
+//                    QObject::connect(item1ComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
+//                    ui->methodSetupTreeWidget->setItemWidget(childItem,2,textItemEdit);
+//                }
 //                if(nRow < customObjectAttributes.valueA.size())
 //                {
 //                    customObjectAttributes.valueA.push_back(combo->currentIndex());

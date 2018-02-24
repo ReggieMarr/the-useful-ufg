@@ -41,6 +41,7 @@ private slots:
 
     void OnTreeItemCBChanged(QStandardItem* testItem);
 
+    void OnTreeDataChanged(QModelIndex indexone,QModelIndex indextwo,QVector<int> somevector);
 
 
 private:

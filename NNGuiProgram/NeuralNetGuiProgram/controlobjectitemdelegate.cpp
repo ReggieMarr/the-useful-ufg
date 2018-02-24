@@ -20,6 +20,7 @@ QWidget* controlObjectItemDelegate::createEditor(QWidget *parent, const QStyleOp
 //    TreeModel *editConstructorItem = new TreeModel(headers);
 //    int rowCount = editConstructorItem->rowCount(index);
 
+
     if(!index.parent().isValid())
     {
 

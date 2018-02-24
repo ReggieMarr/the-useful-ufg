@@ -32,6 +32,10 @@ public:
                 float memoryRange, string filename, int selectedFunction, bool mySQLMode,
                 vector<vector<Layer>> &NNModelLayers, int numberOfHiddenLayers, int firstLayerNeurons);
 
+    void  MethodRunNN(vector<double> &smoothedError,vector<vector<double>> &targetInput,vector<vector<double>> &targetOutput,
+                    vector<vector<double> > &NNOutput,double learningRate,double momentum, float memoryRange, string filename,
+                    int selectedFunction, vector<vector<Layer>> &NNModelLayers, runtimeModel receivedModel);
+
     void  RunNN(vector<double> &smoothedError,vector<vector<double>> &targetOutput,
                 vector<vector<double>> &NNOutput,double learningRate, double momentum,
                 float memoryRange, string filename, int selectedFunction,
