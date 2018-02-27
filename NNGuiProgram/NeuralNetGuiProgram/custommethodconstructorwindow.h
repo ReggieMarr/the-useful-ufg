@@ -36,12 +36,18 @@ public:
 
 private slots:
     void OnComboIndexChanged(const QString& text);
+    void OnTimeBoxChanged(const QString& text);
+
+    void on_addMethodBtn_clicked();
 
 private:
     controlObjectItemDelegate *treeItemDelegate;
+    int childColumnOffset;
+    bool methodHasIfChild;
     Ui::customMethodConstructorWindow *ui;
     std::vector<std::vector<QStringList>> methodBlocks;
-    void addChildRow(QTreeWidget *widgetParent,QTreeWidgetItem *itemParent,int rowType);
+    void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, int cycleStart, int layoutType);
+    void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, int rowType);
 };
 
 #endif // CUSTOMMETHODCONSTRUCTORWINDOW_H
