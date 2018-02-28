@@ -1588,6 +1588,7 @@ void runtime_Window::on_dynamicObjectSetupBtn_clicked()
 {
 //    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
 //    newLogicSetup->show();
-    customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow;
+    customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
     newMethodSetup->show();
+
 }
