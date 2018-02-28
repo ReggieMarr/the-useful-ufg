@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2001-2011 Reginald Marr <reginald.t.marr@gmail.com>
+ *
+ * SPDX-License-Identifier: LGPL-2.1+
+ *
+ */
 #ifndef LOADTRAININGDATA_H
 #define LOADTRAININGDATA_H
 #include <cstdlib>

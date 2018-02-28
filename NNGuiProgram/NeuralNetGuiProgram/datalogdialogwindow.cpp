@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2001-2011 Reginald Marr <reginald.t.marr@gmail.com>
+ *
+ * SPDX-License-Identifier: LGPL-2.1+
+ *
+ */
 #include "datalogdialogwindow.h"
 #include "ui_datalogdialogwindow.h"
 #include "QFileDialog"
