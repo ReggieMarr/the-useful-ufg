@@ -13,6 +13,6 @@ The training set must be in the format of the following:
   
   out: expectedoutput1 expectedoutput2 expectedoutput3 ect..
   
-  I am working to put this together and give credits where neccesary and figure out licensing ASAP so for all those who put together some of the libraries I am using and dont see proper credit where due please wait ! Or message me, I am in the middle of exams right now and am still trying to figure this all out.
+  I am working to put this together and give credits where neccesary and figure out licensing ASAP so for all those who put together some of the libraries I am using and dont see proper credit where due please wait ! Or message me, I am still trying to figure this all out.
   
   Thank you !! 
