@@ -2,7 +2,6 @@
  * Copyright © 2001-2011 Reginald Marr <reginald.t.marr@gmail.com>
  *
  * SPDX-License-Identifier: LGPL-2.1+
- *
  */
 #include "custommethodconstructorwindow.h"
 #include "ui_custommethodconstructorwindow.h"
@@ -11,7 +10,7 @@
 #include "QTextEdit"
 #include "QLineEdit"
 #include "QPushButton"
-
+#include "iostream"
 
 Q_DECLARE_METATYPE(QTreeWidgetItem*)
 Q_DECLARE_METATYPE(QStackedWidget*)
@@ -26,7 +25,7 @@ customMethodConstructorWindow::customMethodConstructorWindow(QWidget *parent) :
     ui->methodSetupTreeWidget->setItemDelegate(treeItemDelegate);
     ui->methodSetupTreeWidget->setColumnCount(5);
 
-    QStringList rootName;
+
     //this is all done to then later populate the comboboxes
     //tags could be dynamically passed into the setupblock
     std::vector<QStringList> setup,reaction;
@@ -35,7 +34,7 @@ customMethodConstructorWindow::customMethodConstructorWindow(QWidget *parent) :
     setup.push_back(QString("Time Passed;Static Var;Tag Var").split(";"));
     setup.push_back(QString("<;=;!=;>").split(";"));
     setup.push_back(QString("Time Passed;Static Var;Tag Var").split(";"));
-    //setup.push_back(QString("Continue;And;Or").split(";"));
+    setup.push_back(QString("Continue;And;Or").split(";"));
 
     reaction.push_back(QString("Action;Item;Static Var").split(";"));
     reaction.push_back(QString("End;Else").split(";"));
@@ -44,9 +43,7 @@ customMethodConstructorWindow::customMethodConstructorWindow(QWidget *parent) :
     methodBlocks.push_back(setup);
     methodBlocks.push_back(reaction);
 
-    rootName << "Method One";
-
-    AddRoot(rootName);
+    AddRoot("Method One");
     for(int i = 0; i < ui->methodSetupTreeWidget->columnCount();i++)
     {
         ui->methodSetupTreeWidget->resizeColumnToContents(i);
@@ -63,7 +60,8 @@ customMethodConstructorWindow::~customMethodConstructorWindow()
     delete ui;
 }
 
-void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, int cycleStart, int layoutType)
+void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, bool fillSelections,
+                                                int layoutType,int rootIndex)
 {
     //default is to fill child row with time comparison
     //TODO: fix this in the future
@@ -77,6 +75,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
     int widgetType,methodBlockCount = 0,rowType = 0;
     int cycleSetup = 0,cycleSize;
     int timeLineEditLocation = 2,lineEditLocation = 4 + timeLineEditLocation;
+    int childColumnOffset;
 
     switch (layoutType) {
     case 0:
@@ -111,13 +110,16 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 itemComboBox->addItems(methodBlocks.at(rowType).at(methodBlockCount));
             }
 
-
-            QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
+            QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -132,11 +134,16 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 timeItemCombobox->setProperty("column",cycleSetup);
                 timeItemCombobox->setProperty("childItem",childItemVariant);
                 timeItemCombobox->addItems(QString("Seconds;MilliSeconds").split(";"));
-                QObject::connect(timeItemCombobox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnTimeBoxChanged(const QString&)));
+
                 timeCBWidgetVar.setValue(timeItemCombobox);
                 childItem->setData(cycleSetup,Qt::UserRole,timeCBWidgetVar);
                 widgetType = 2;//this means its a time passed type
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections&& customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 2)
+                {
+                    timeItemCombobox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+                }
+                QObject::connect(timeItemCombobox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnTimeBoxChanged(const QString&)));
                 widgetParent->setItemWidget(childItem,cycleSetup,timeItemCombobox);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -155,12 +162,18 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeLEWidgetVar);
                 widgetType = 1;//this means its a time passed type combobox
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+                {
+                    itemLineEdit->setText(QString::number(customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup)));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,itemLineEdit);
                 itemParent->addChild(childItem);
                 cycleSetup++;
             }
 
         }
+
+        fillSelections = false;
 
     }
         break;
@@ -200,10 +213,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
 
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -223,6 +240,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeCBWidgetVar);
                 widgetType = 2;//this means its a time passed type
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections&& customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 2)
+                {
+                    timeItemCombobox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,timeItemCombobox);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -241,6 +262,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeLEWidgetVar);
                 widgetType = 1;//this means its a time passed type combobox
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+                {
+                    itemLineEdit->setText(QString::number(customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup)));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,itemLineEdit);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -277,10 +302,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
             }
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -300,6 +329,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeCBWidgetVar);
                 widgetType = 2;//this means its a time passed type
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections&& customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 2)
+                {
+                    timeItemCombobox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,timeItemCombobox);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -313,7 +346,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
     {
         cycleSize = methodBlockCount+methodBlocks.at(rowType).size() + 1;
         widgetParent->setColumnCount(cycleSize);
-        timeLineEditLocation = 2;
+        timeLineEditLocation = 4;
         while (cycleSetup < cycleSize)
         {
             QComboBox *itemComboBox = new QComboBox;
@@ -337,10 +370,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
 
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -360,6 +397,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeCBWidgetVar);
                 widgetType = 2;//this means its a time passed type
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections&& customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 2)
+                {
+                    timeItemCombobox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,timeItemCombobox);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -400,13 +441,16 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 itemComboBox->addItems(methodBlocks.at(rowType).at(methodBlockCount));
             }
 
-
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -426,6 +470,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeLEWidgetVar);
                 widgetType = 1;//this means its a time passed type combobox
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+                {
+                    itemLineEdit->setText(QString::number(customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup)));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,itemLineEdit);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -469,10 +517,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
             }
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -492,6 +544,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeLEWidgetVar);
                 widgetType = 1;//this means its a time passed type combobox
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+                {
+                    itemLineEdit->setText(QString::number(customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup)));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,itemLineEdit);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -523,10 +579,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
             }
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -562,10 +622,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
 
             QObject::connect(itemComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
             QVariant itemWidgetVar;
-            itemWidgetVar.fromValue(itemComboBox);
+            itemWidgetVar.setValue(itemComboBox);
             childItem->setData(cycleSetup,Qt::UserRole,itemWidgetVar);
             widgetType = 0;//this means its a method blocks type combobox
             childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+            if(fillSelections && customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 0)
+            {
+                itemComboBox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+            }
             widgetParent->setItemWidget(childItem,cycleSetup,itemComboBox);
             itemParent->addChild(childItem);
             cycleSetup++;
@@ -585,6 +649,10 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 childItem->setData(cycleSetup,Qt::UserRole,timeLEWidgetVar);
                 widgetType = 2;//this means its a time passed type
                 childItem->setData(cycleSetup,Qt::UserRole+1,QVariant::fromValue(widgetType));
+                if(fillSelections&& customObjectMethods.selectionType.at(childColumnOffset).at(cycleSetup) == 2)
+                {
+                    timeItemCombobox->setCurrentIndex((int)customObjectMethods.userSelection.at(childColumnOffset).at(cycleSetup));
+                }
                 widgetParent->setItemWidget(childItem,cycleSetup,timeItemCombobox);
                 itemParent->addChild(childItem);
                 cycleSetup++;
@@ -596,8 +664,14 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         break;
     }
 
-    childItem->setData(0,Qt::UserRole+2,QVariant::fromValue(cycleSize));
+    childItem->setData(0,Qt::UserRole+2,QVariant::fromValue(cycleSize)); //gives the columnCount
     childItem->setData(0,Qt::UserRole+3,layoutType);//indicates layout type
+    childItem->setData(0,Qt::UserRole+4,QVariant::fromValue(rootIndex));
+    widgetParent->setColumnCount(cycleSize);
+    for(int i = 0; i < widgetParent->columnCount();i++)
+    {
+        widgetParent->resizeColumnToContents(i);
+    }
 
 }
 
@@ -615,7 +689,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
     item0ComboBox->setProperty("row", 1);
     item0ComboBox->setProperty("column", 0);
     item0ComboBox->addItems(methodBlocks.at(1).at(0));
-    QObject::connect(item0ComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
+    //QObject::connect(item0ComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
     widgetParent->setItemWidget(childItem,0,item0ComboBox);
     itemParent->addChild(childItem);
 
@@ -624,23 +698,23 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
     item1ComboBox->setProperty("row", 1);
     item1ComboBox->setProperty("column", 1);
     item1ComboBox->addItems(methodBlocks.at(1).at(rowType));
-    QObject::connect(item1ComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
+    //QObject::connect(item1ComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnComboIndexChanged(const QString&)));
     widgetParent->setItemWidget(childItem,1,item1ComboBox);
     itemParent->addChild(childItem);
 
 }
 
-void customMethodConstructorWindow::AddRoot(QStringList rootNames)
+void customMethodConstructorWindow::AddRoot(QString rootName)
 {
     QTreeWidgetItem *rootItem = new QTreeWidgetItem(ui->methodSetupTreeWidget);
 
-    for(int i = 0;i< rootNames.size();i++)
-    {
-        rootItem->setText(i,rootNames.at(i));
-    }
+    rootItem->setText(0,rootName);
+
+    treeRootNames.push_back(rootName);
+
     ui->methodSetupTreeWidget->addTopLevelItem(rootItem);
 
-    addChildRow(ui->methodSetupTreeWidget,rootItem,0,0);
+    addChildRow(ui->methodSetupTreeWidget,rootItem,0,0,treeRootNames.size()-1);
 
     addChildRow(ui->methodSetupTreeWidget,rootItem->child(0),0);
     //AddChild(rootItem,QString("one;two;three").split(";"));
@@ -672,23 +746,105 @@ void customMethodConstructorWindow::OnComboIndexChanged(const QString& text)
         //int nRow = combo->property("row").toInt();
         int nCol = combo->property("column").toInt();
         QTreeWidgetItem *childItem = combo->property("childItem").value<QTreeWidgetItem*>();
-        QTreeWidgetItem *parentItem = childItem->parent();
+        unsigned rootIndex = childItem->data(0,Qt::UserRole+4).toInt();
+        QTreeWidgetItem *parentItem = childItem->parent()->treeWidget()->topLevelItem(rootIndex);//childItem->parent();
+
+        unsigned childIndex = parentItem->indexOfChild(childItem);
+        unsigned currentColumnCount = childItem->data(0,Qt::UserRole+2).toInt();
+
         QTreeWidget* widgetParent = parentItem->treeWidget();
 
-        int currentColumnCount = childItem->data(0,Qt::UserRole+2).toInt();
-
-        int currentLayoutType = childItem->data(0,Qt::UserRole+3).toInt();
+        unsigned currentLayoutType = childItem->data(0,Qt::UserRole+3).toInt();
         //note that the number of columns is offset by one with reference to the nCol
 
+        //this was originally for the the last column, where we were to create the if and, or ect
         if(nCol == currentColumnCount-1)
         {
             if(combo->currentIndex() != 0)
             {
                 childColumnOffset++;
-                //childItem->removeChild(childItem->child(0));
                 widgetParent->setColumnCount(childColumnOffset + currentColumnCount);
-                addChildRow(widgetParent,parentItem,2,0);
-                //addChildRow(widgetParent,childItem->child(0),1);
+
+                //std::vector<std::vector<int>> methodSetup;
+                customObjectMethods.selectionType.clear();
+                customObjectMethods.userSelection.clear();
+                
+                int ifCount = 0;
+                int vecsize = 0;
+
+                while(parentItem->childCount() != 0)
+                {
+                    vecsize = customObjectMethods.selectionType.size();
+                    customObjectMethods.selectionType.resize(ifCount+1);
+                    customObjectMethods.userSelection.resize(ifCount+1);
+                    vecsize = customObjectMethods.selectionType.size();
+
+                    QTreeWidgetItem *saveChild = parentItem->child(0);
+                    int columnCount = saveChild->data(0,Qt::UserRole+2).toInt();
+                    for(int i = 0;i<columnCount;i++)
+                    {
+                        int widgetType = saveChild->data(i,Qt::UserRole+1).toInt();
+                        switch (widgetType) {
+                        case 0:
+                        {
+                            QComboBox *methodBlockCombo = saveChild->data(i,Qt::UserRole).value<QComboBox*>();
+                            if(methodBlockCombo)
+                            {
+                                int index = methodBlockCombo->currentIndex();
+                                customObjectMethods.userSelection.at(ifCount).push_back((double)index);
+                                customObjectMethods.selectionType.at(ifCount).push_back(0);
+                                std::cout << "Caught method block at col: " << i << std::endl;
+                            }
+                            else
+                            {
+                                std::cout << "Missed method block at col: " << i << std::endl;
+                            }
+
+                        }
+                            break;
+                        case 1:
+                        {
+                            QLineEdit *staticVarLE = saveChild->data(i,Qt::UserRole).value<QLineEdit*>();
+
+                            if(staticVarLE)
+                            {
+                                customObjectMethods.userSelection.at(ifCount).push_back((staticVarLE->text().toDouble()));
+                                customObjectMethods.selectionType.at(ifCount).push_back(1);
+                                std::cout << "Caught static var at col: " << i << std::endl;
+                            }
+                            else
+                            {
+                                std::cout << "Missed static var at col: " << i << std::endl;
+                            }
+
+                        }
+                            break;
+                        case 2:
+                        {
+                            QComboBox *timeCombo = saveChild->data(i,Qt::UserRole).value<QComboBox*>();
+
+                            if(timeCombo)
+                            {
+                                customObjectMethods.userSelection.at(ifCount).push_back((double)timeCombo->currentIndex());
+                                customObjectMethods.selectionType.at(ifCount).push_back(2);
+                                std::cout << "Caught time combo at col: " << i << std::endl;
+                            }
+                            else
+                            {
+                                std::cout << "Missed time combo at col: " << i << std::endl;
+                            }
+                        }
+                            break;
+                        }
+                    }
+
+                    ifCount++;
+                    parentItem->removeChild(saveChild);
+                }
+
+                addChildRow(widgetParent,parentItem,true,currentLayoutType,rootIndex);
+                addChildRow(widgetParent,parentItem->child(childIndex),false,0,rootIndex);
+                addChildRow(widgetParent,parentItem->child(parentItem->childCount()-1)->child(0),1);
                 return;
             }
             else
@@ -699,141 +855,229 @@ void customMethodConstructorWindow::OnComboIndexChanged(const QString& text)
             }
 
         }
-//        while(childItem->childCount() != 0)
-//        {
-//            childItem->removeChild(childItem->child(0));
-//        }
 
-        while(parentItem->childCount() != childColumnOffset)//childColumnOffset)
+        if(childColumnOffset > 0)
         {
-            parentItem->removeChild(parentItem->child(childColumnOffset));
+            customObjectMethods.selectionType.clear();
+            customObjectMethods.userSelection.clear();
+
+            int ifCount = 0;
+            int vecsize = 0;
+
+            while(parentItem->childCount() != 0)
+            {
+                vecsize = customObjectMethods.selectionType.size();
+                customObjectMethods.selectionType.resize(ifCount+1);
+                customObjectMethods.userSelection.resize(ifCount+1);
+                vecsize = customObjectMethods.selectionType.size();
+
+                QTreeWidgetItem *saveChild = parentItem->child(0);
+                int columnCount = saveChild->data(0,Qt::UserRole+2).toInt();
+                for(int i = 0;i<columnCount;i++)
+                {
+                    int widgetType = saveChild->data(i,Qt::UserRole+1).toInt();
+                    switch (widgetType) {
+                    case 0:
+                    {
+                        QComboBox *methodBlockCombo = saveChild->data(i,Qt::UserRole).value<QComboBox*>();
+                        if(methodBlockCombo)
+                        {
+                            int index = methodBlockCombo->currentIndex();
+                            customObjectMethods.userSelection.at(ifCount).push_back((double)index);
+                            customObjectMethods.selectionType.at(ifCount).push_back(0);
+                            std::cout << "Caught method block at col: " << i << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "Missed method block at col: " << i << std::endl;
+                        }
+
+                    }
+                        break;
+                    case 1:
+                    {
+                        QLineEdit *staticVarLE = saveChild->data(i,Qt::UserRole).value<QLineEdit*>();
+
+                        if(staticVarLE)
+                        {
+                            customObjectMethods.userSelection.at(ifCount).push_back((staticVarLE->text().toDouble()));
+                            customObjectMethods.selectionType.at(ifCount).push_back(1);
+                            std::cout << "Caught static var at col: " << i << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "Missed static var at col: " << i << std::endl;
+                        }
+
+                    }
+                        break;
+                    case 2:
+                    {
+                        QComboBox *timeCombo = saveChild->data(i,Qt::UserRole).value<QComboBox*>();
+
+                        if(timeCombo)
+                        {
+                            customObjectMethods.userSelection.at(ifCount).push_back((double)timeCombo->currentIndex());
+                            customObjectMethods.selectionType.at(ifCount).push_back(2);
+                            std::cout << "Caught time combo at col: " << i << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "Missed time combo at col: " << i << std::endl;
+                        }
+                    }
+                        break;
+                    }
+                }
+
+                ifCount++;
+                parentItem->removeChild(saveChild);
+            }
+
+            for(unsigned int i = 0;i<childColumnOffset;i++)
+            {
+
+            }
+
+        }
+        else
+        {
+            while(parentItem->childCount() != 0)//childColumnOffset)
+            {
+                parentItem->removeChild(parentItem->child(parentItem->childCount()-1));
+            }
+
+            switch (currentLayoutType) {
+            case 0:
+            {
+                if(nCol == 1)
+                {
+                    addChildRow(widgetParent,parentItem,false,5,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,2,rootIndex);
+                }
+
+            }
+                break;
+            case 1:
+            {
+                if(nCol == 1)
+                {
+                    addChildRow(widgetParent,parentItem,false,6,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,4,rootIndex);
+                }
+            }
+                break;
+            case 2:
+            {
+                if(text == "Static Var" && nCol == 4)
+                {
+                    addChildRow(widgetParent,parentItem,false,0,rootIndex);
+                }
+                else if(nCol == 1 && text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,4,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,6,rootIndex);
+                }
+            }
+                break;
+            case 3:
+            {
+                if(nCol == 3 && text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,1,rootIndex);
+                }
+                else if(nCol == 1 && text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,5,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,6,rootIndex);
+                }
+            }
+                break;
+            case 4:
+            {
+                if(nCol == 4 && text == "Time Passed")
+                {
+                    addChildRow(widgetParent,parentItem,false,1,rootIndex);
+                }
+                else if(nCol == 1 && text == "Time Passed")
+                {
+                    addChildRow(widgetParent,parentItem,false,2,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,6,rootIndex);
+                }
+            }
+                break;
+            case 5:
+            {
+                if(text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,0,rootIndex);
+                }
+                else if(text == "Time Passed" && nCol == 1)
+                {
+                    addChildRow(widgetParent,parentItem,false,0,rootIndex);
+                }
+                else if(text == "Time Passed" && nCol == 3)
+                {
+                    addChildRow(widgetParent,parentItem,false,7,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,6,rootIndex);
+                }
+            }
+                break;
+            case 6:
+            {
+                if(nCol == 1 && text == "Time Passed")
+                {
+                    addChildRow(widgetParent,parentItem,false,2,rootIndex);
+                }
+                else if(nCol == 1 && text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,4,rootIndex);
+                }
+                else if(nCol == 3 && text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,5,rootIndex);
+                }
+                else
+                {
+                    addChildRow(widgetParent,parentItem,false,3,rootIndex);
+                }
+            }
+                break;
+            case 7:
+            {
+                if(nCol == 3)
+                {
+                    addChildRow(widgetParent,parentItem,false,6,rootIndex);
+                }
+                else if(text == "Static Var")
+                {
+                    addChildRow(widgetParent,parentItem,false,1,rootIndex);
+                }
+            }
+                break;
+            }
+
         }
 
 
-        //this
-        switch (currentLayoutType) {
-        case 0:
-        {
-            if(nCol == 1)
-            {
-                addChildRow(widgetParent,parentItem,2,5);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,2);
-            }
-
-        }
-            break;
-        case 1:
-        {
-            if(nCol == 1)
-            {
-                addChildRow(widgetParent,parentItem,5,6);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,4);
-            }
-        }
-            break;
-        case 2:
-        {
-            if(text == "Static Var" && nCol == 4)
-            {
-                addChildRow(widgetParent,parentItem,5,0);
-            }
-            else if(nCol == 1 && text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,4);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,6);
-            }
-        }
-            break;
-        case 3:
-        {
-            if(nCol == 3 && text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,1);
-            }
-            else if(nCol == 1 && text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,5);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,6);
-            }
-        }
-            break;
-        case 4:
-        {
-            if(nCol == 4 && text == "Time Passed")
-            {
-                addChildRow(widgetParent,parentItem,5,1);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,2);
-            }
-        }
-            break;
-        case 5:
-        {
-            if(text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,0);
-            }
-            else if(text == "Time Passed" && nCol == 1)
-            {
-                addChildRow(widgetParent,parentItem,5,0);
-            }
-            else if(text == "Time Passed" && nCol == 3)
-            {
-                addChildRow(widgetParent,parentItem,5,7);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,6);
-            }
-        }
-            break;
-        case 6:
-        {
-            if(nCol == 1 && text == "Time Passed")
-            {
-                addChildRow(widgetParent,parentItem,5,2);
-            }
-            else if(nCol == 1 && text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,4);
-            }
-            else if(nCol == 3 && text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,5);
-            }
-            else
-            {
-                addChildRow(widgetParent,parentItem,5,3);
-            }
-        }
-            break;
-        case 7:
-        {
-            if(nCol == 3)
-            {
-                addChildRow(widgetParent,parentItem,5,6);
-            }
-            else if(text == "Static Var")
-            {
-                addChildRow(widgetParent,parentItem,5,1);
-            }
-        }
-            break;
-        }
 
 //        int kidCount = 0;
 //        if(childColumnOffset != 0)
@@ -846,8 +1090,14 @@ void customMethodConstructorWindow::OnComboIndexChanged(const QString& text)
 //            //kidCount = parentItem->childCount();
 //            addChildRow(widgetParent,childItem->child(childColumnOffset),0);
 //        }
-        addChildRow(widgetParent,parentItem->child(childColumnOffset),0);
-        widgetParent->setColumnCount(childColumnOffset + currentColumnCount);
+        if(childColumnOffset < 1)
+        {
+            childColumnOffset = 0;
+        }
+
+        //addChildRow(widgetParent,parentItem->child(childColumnOffset),0);
+        //addChildRow(widgetParent,parentItem->child(childColumnOffset),0);
+        widgetParent->setColumnCount(currentColumnCount+1 + childColumnOffset);
         for(int i = 0; i < widgetParent->columnCount();i++)
         {
             widgetParent->resizeColumnToContents(i);
@@ -856,7 +1106,6 @@ void customMethodConstructorWindow::OnComboIndexChanged(const QString& text)
     }
 
 }
-
 
 void customMethodConstructorWindow::on_addMethodBtn_clicked()
 {

@@ -6,6 +6,7 @@
  */
 #include "startupwindow.h"
 #include "ui_startupwindow.h"
+#include "custommethodconstructorwindow.h"
 
 StartupWindow::StartupWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,8 +37,10 @@ void StartupWindow::on_selectButton_clicked()
     this->close();
     if(trainingMode)
     {
-        NeuralNetWindow = new NNConfigWindow(this,trainingMode);
-        NeuralNetWindow->show();
+        customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
+        newMethodSetup->show();
+//        NeuralNetWindow = new NNConfigWindow(this,trainingMode);
+//        NeuralNetWindow->show();
     }
     else
     {
