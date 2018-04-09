@@ -5,12 +5,16 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT       += sql widgets
+QT       += widgets
+QT       += sql
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = NeuralNetGuiProgram
 TEMPLATE = app
+
+CONFIG += qt
 
 CONFIG += extserialport
 
@@ -33,8 +37,6 @@ SOURCES += main.cpp\
     datalogdialogwindow.cpp \
     executelogicsetupwindow.cpp \
     controlobjectitemdelegate.cpp \
-    treemodel.cpp \
-    treeitem.cpp \
     custommethodconstructorwindow.cpp \
     controlmethodmanagement.cpp
 
@@ -56,8 +58,6 @@ HEADERS  += nnconfigwindow.h \
     datalogdialogwindow.h \
     executelogicsetupwindow.h \
     controlobjectitemdelegate.h \
-    treemodel.h \
-    treeitem.h \
     custommethodconstructorwindow.h \
     controlmethodmanagement.h
 
@@ -75,11 +75,15 @@ FORMS    += nnconfigwindow.ui \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \
 #            /home/reggie/Project_Apps/NeuralNet_Still/ModbusLinuxServer/libmodbus/src/
 
-INCLUDEPATH += "/usr/local/include/"
+INCLUDEPATH += "/usr/local/include/" \
+#INCLUDEPATH += /usr/include/x86_64-linux-gnu/qt5/ \
+#INCLUDEPATH += $QTDIR/include/QtGui
 
 INCLUDEPATH += "/home/reggie/Project_Apps/gitDownloads/nlohmann3.0.0/json"
 
 LIBS += -L/usr/local/lib -lmodbus
+
+
 
 #unix {
 #    SOURCES += 3rdparty/qextserialport/posix_qextserialport.cpp	\

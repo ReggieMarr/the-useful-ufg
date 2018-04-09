@@ -7,7 +7,7 @@
 #include "controlobjectitemdelegate.h"
 #include "QAbstractItemDelegate"
 #include "QAbstractItemModel"
-#include "treemodel.h"
+//#include "treemodel.h"
 
 controlObjectItemDelegate::controlObjectItemDelegate(QObject *parent) :
     QItemDelegate(parent)

@@ -22,9 +22,8 @@ struct methodSetup
     methodSetup() {}
 
     std::vector<std::vector<double>> userSelection;
-    std::vector<std::vector<int>> selectionType;
-
-
+    std::vector<std::vector<int>> selectionType; //this may not be needed as it could be implied from layout type
+    std::vector<int> layoutType;
 };
 
 class customMethodConstructorWindow : public QMainWindow
@@ -55,7 +54,7 @@ private:
     Ui::customMethodConstructorWindow *ui;
     std::vector<std::vector<QStringList>> methodBlocks;
     void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, bool fillSelections, int layoutType, int rootIndex);
-    void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, int rowType);
+    void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent);
 };
 
 #endif // CUSTOMMETHODCONSTRUCTORWINDOW_H

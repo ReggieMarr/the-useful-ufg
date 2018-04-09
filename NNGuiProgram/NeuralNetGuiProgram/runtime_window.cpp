@@ -14,11 +14,12 @@
 #include "QSqlDriver"
 #include "QSqlRecord"
 #include "QSqlField"
-#include "qsqlconnectiondialog.h"
+//#include "qsqlconnectiondialog.h"
 #include "startupwindow.h"
 #include "loadtrainingdata.h"
 #include "fstream"
 #include "qextserialenumerator.h"
+#include "qextserialport.h"
 #include "executelogicsetupwindow.h"
 #include "custommethodconstructorwindow.h"
 
@@ -951,7 +952,8 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
                 updateCombobox(0);
                 //ui->messageBox->addItems(MessageNames[0]);
             }
-            ui->messageBox->setCurrentText(0);
+            ui->messageBox->setCurrentIndex(0);
+
             processTypeOpened = true;
         }
 
