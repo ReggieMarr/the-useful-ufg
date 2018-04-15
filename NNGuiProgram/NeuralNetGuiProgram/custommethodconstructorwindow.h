@@ -55,6 +55,8 @@ private:
     std::vector<std::vector<QStringList>> methodBlocks;
     void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, bool fillSelections, int layoutType, int rootIndex);
     void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent);
+    void updateLayout(unsigned currentLayout, unsigned selectedColumn, QString selectedText,
+                      QTreeWidget *widgetParent, QTreeWidgetItem *parentItem, bool fillInputs, unsigned rootIndex, int methodCycle);
 };
 
 #endif // CUSTOMMETHODCONSTRUCTORWINDOW_H

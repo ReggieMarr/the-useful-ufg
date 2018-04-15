@@ -29,8 +29,8 @@ public:
     void BackPropogation(const vector<double> &TargetVals, double learnToEta, double momentumToAlpha,
                          double memoryRangeToSmoothingFactor,int activationFunctionType);
     void BackPropogation(const vector<double> &TargetVals, double learnToEta,
-                                   double momentumToAlpha, double memoryRangeToSmoothingFactor,
-                                   int activationFunctionType, const vector<double> Outputs, const vector<double> Inputs);
+                         double momentumToAlpha, double memoryRangeToSmoothingFactor,
+                         int activationFunctionType, const vector<double> Outputs, const vector<double> Inputs);
     //since GetResults doesnt actually do anything and just reads
     //the results and spits them back so it is a const function
     //note that the const is not neccessary
