@@ -57,6 +57,8 @@ private:
     void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent);
     void updateLayout(unsigned currentLayout, unsigned selectedColumn, QString selectedText,
                       QTreeWidget *widgetParent, QTreeWidgetItem *parentItem, bool fillInputs, unsigned rootIndex, int methodCycle);
+    int updateMethodModel(int cycleCount, QTreeWidgetItem *parentItem);
+
 };
 
 #endif // CUSTOMMETHODCONSTRUCTORWINDOW_H
