@@ -30,7 +30,7 @@ class customMethodConstructorWindow : public QMainWindow
 {
     Q_OBJECT
 
-    void AddRoot(QString rootName);
+    void AddRoot(QString rootName, int ifIndex);
     void AddChild(QTreeWidgetItem *parent, QStringList rootNames);
 
 public:
@@ -41,9 +41,8 @@ public:
     ~customMethodConstructorWindow();
 
 private slots:
-    void OnComboIndexChanged(const QString& text);
-    void OnTimeBoxChanged(const QString& text);
-
+    void OnLogicSetupComboIndexChanged(const QString& text);
+    void OnExecuteLogicComboIndexChanged(const QString& text);
     void on_addMethodBtn_clicked();
 
 private:
@@ -51,12 +50,13 @@ private:
     controlObjectItemDelegate *treeItemDelegate;
     int childColumnOffset;
     bool methodHasIfChild;
+    int methodIndex,loggedIfIndex;
     Ui::customMethodConstructorWindow *ui;
     std::vector<std::vector<QStringList>> methodBlocks;
-    void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, bool fillSelections, int layoutType, int rootIndex);
+    void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent, bool fillSelections, int layoutType, int rootIndex, int ifIndex);
     void addChildRow(QTreeWidget *widgetParent, QTreeWidgetItem *itemParent);
     void updateLayout(unsigned currentLayout, unsigned selectedColumn, QString selectedText,
-                      QTreeWidget *widgetParent, QTreeWidgetItem *parentItem, bool fillInputs, unsigned rootIndex, int methodCycle);
+                      QTreeWidget *widgetParent, QTreeWidgetItem *parentItem, bool fillInputs, unsigned rootIndex, int methodCycle, int ifIndex);
     int updateMethodModel(int cycleCount, QTreeWidgetItem *parentItem);
 
 };
