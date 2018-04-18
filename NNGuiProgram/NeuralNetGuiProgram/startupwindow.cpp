@@ -37,10 +37,10 @@ void StartupWindow::on_selectButton_clicked()
     this->close();
     if(trainingMode)
     {
-        customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
-        newMethodSetup->show();
-//        NeuralNetWindow = new NNConfigWindow(this,trainingMode);
-//        NeuralNetWindow->show();
+//        customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
+//        newMethodSetup->show();
+        NeuralNetWindow = new NNConfigWindow(this,trainingMode);
+        NeuralNetWindow->show();
     }
     else
     {

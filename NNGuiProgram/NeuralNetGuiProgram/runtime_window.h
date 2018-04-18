@@ -99,6 +99,8 @@ private slots:
     void on_saveToFileChkBox_stateChanged(int arg1);
 
     void on_dynamicObjectSetupBtn_clicked();
+    
+    void on_linkNNBtn_clicked();
 
 private:
     //Browser * m_model;

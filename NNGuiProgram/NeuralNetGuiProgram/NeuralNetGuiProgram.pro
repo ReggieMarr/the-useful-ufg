@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     executelogicsetupwindow.cpp \
     controlobjectitemdelegate.cpp \
     custommethodconstructorwindow.cpp \
-    controlmethodmanagement.cpp
+    controlmethodmanagement.cpp \
+    nntotagslinkagewindow.cpp
 
 HEADERS  += nnconfigwindow.h \
     customnn.h \
@@ -59,7 +60,8 @@ HEADERS  += nnconfigwindow.h \
     executelogicsetupwindow.h \
     controlobjectitemdelegate.h \
     custommethodconstructorwindow.h \
-    controlmethodmanagement.h
+    controlmethodmanagement.h \
+    nntotagslinkagewindow.h
 
 FORMS    += nnconfigwindow.ui \
     mysqlcustomquerywindow.ui \
@@ -69,7 +71,8 @@ FORMS    += nnconfigwindow.ui \
     runtime_window.ui \
     datalogdialogwindow.ui \
     executelogicsetupwindow.ui \
-    custommethodconstructorwindow.ui
+    custommethodconstructorwindow.ui \
+    nntotagslinkagewindow.ui
 
 #INCLUDEPATH += /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus \
 #               /home/reggie/Project_Apps/NeuralNet_Still/ModbusCustom/qmodbus/3rdparty/libmodbus/src \

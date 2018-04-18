@@ -22,6 +22,7 @@
 #include "qextserialport.h"
 #include "executelogicsetupwindow.h"
 #include "custommethodconstructorwindow.h"
+#include "nntotagslinkagewindow.h"
 
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
@@ -57,8 +58,8 @@ runtime_Window::runtime_Window(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     //ui->interactionSelect->setCurrentIndex(connectionType);
     //ui->tabWidget->setTabBarAutoHide(true);
-    ui->tabWidget->setTabEnabled(1,false);
     ui->tabWidget->setTabEnabled(2,false);
+    ui->tabWidget->setTabEnabled(3,false);
     processTypeOpened = false;
     dataLoggingSetup = false;
 
@@ -198,7 +199,7 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
             updatedFile << "in: ";
             for(inputRowFill = 0;inputRowFill<deviceInputs.at(columnFill).size();inputRowFill++)
             {
-                QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
+                //QTableWidgetItem *csvInputTableItems = new QTableWidgetItem;
 
                 updatedFile << QString::number(deviceInputs.at(columnFill).at(inputRowFill)).toStdString() + " ";
             }
@@ -208,7 +209,7 @@ void runtime_Window::updateDatabase(bool tableOnly,int dbType)
             updatedFile << "out: ";
             for(outputRowFill = inputRowFill;outputRowFill<deviceOutputs.at(columnFill).size()+inputRowFill;outputRowFill++)
             {
-                QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
+                //QTableWidgetItem *csvOutputTableItems = new QTableWidgetItem;
 
                 updatedFile << QString::number(deviceOutputs.at(columnFill).at(outputRowFill-inputRowFill)).toStdString() + " ";
             }
@@ -992,7 +993,7 @@ void runtime_Window::on_interactionSelect_currentIndexChanged(int index)
 {
     if(index > 0)
     {
-        ui->tabWidget->setTabEnabled(1,true);
+        ui->tabWidget->setTabEnabled(2,true);
     }
     connectionType = index;
 
@@ -1600,4 +1601,11 @@ void runtime_Window::on_dynamicObjectSetupBtn_clicked()
     customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
     newMethodSetup->show();
 
+}
+
+
+void runtime_Window::on_linkNNBtn_clicked()
+{
+    NNtoTagsLinkageWindow *newLinkWindow = new NNtoTagsLinkageWindow(this);
+    newLinkWindow->show();
 }
