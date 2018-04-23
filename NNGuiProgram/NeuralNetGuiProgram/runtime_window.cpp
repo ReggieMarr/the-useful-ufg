@@ -23,6 +23,7 @@
 #include "executelogicsetupwindow.h"
 #include "custommethodconstructorwindow.h"
 #include "nntotagslinkagewindow.h"
+#include "controlmethodmanagement.h"
 
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
@@ -46,6 +47,7 @@ runtime_Window::runtime_Window(QWidget *parent) :
 
     ui->setupUi(this);
     QWidget::showMaximized();
+
 
     ui->controlSelectComboBox->addItem("Predictive Control");
     ui->controlSelectComboBox->addItem("Static Adaptive Control");
@@ -959,7 +961,7 @@ void runtime_Window::on_tabWidget_currentChanged(int index)
         }
 
         break;
-    case 2:
+    case 3:
         if(!dataLoggingSetup)
         {
             //datasetup = new dataLogDialogWindow(this,dbType);
@@ -1011,13 +1013,14 @@ void runtime_Window::releaseTcpModbus()
 
 void runtime_Window::on_dataLogChkBox_stateChanged(int arg1)
 {
+    methodSetup tester2 = *fillableSetup;
     if(arg1 == 2)
     {
-        ui->tabWidget->setTabEnabled(2,true);
+        ui->tabWidget->setTabEnabled(3,true);
     }
     else
     {
-        ui->tabWidget->setTabEnabled(2,false);
+        ui->tabWidget->setTabEnabled(3,false);
     }
 }
 
@@ -1339,7 +1342,8 @@ void runtime_Window::on_autoUpdateConfigButton_clicked()
 {
 //    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
 //    newLogicSetup->show();
-    customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow;
+    methodSetup testSetup;
+    customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
     newMethodSetup->show();
 }
 
@@ -1596,9 +1600,9 @@ void runtime_Window::on_saveToFileChkBox_stateChanged(int arg1)
 
 void runtime_Window::on_dynamicObjectSetupBtn_clicked()
 {
-//    executeLogicSetupWindow *newLogicSetup = new executeLogicSetupWindow;
-//    newLogicSetup->show();
     customMethodConstructorWindow *newMethodSetup = new customMethodConstructorWindow(this);
+    connect(newMethodSetup,SIGNAL(updatedMethodObject(methodSetup)),
+            this,SLOT(on_updatedMethodObject(methodSetup)));
     newMethodSetup->show();
 
 }
@@ -1608,4 +1612,22 @@ void runtime_Window::on_linkNNBtn_clicked()
 {
     NNtoTagsLinkageWindow *newLinkWindow = new NNtoTagsLinkageWindow(this);
     newLinkWindow->show();
+}
+
+
+void runtime_Window::on_engageDynamicMethodsChk_toggled(bool checked)
+{
+    if(checked && fillableSetup)
+    {
+        controlMethodManagement controlObj;
+        while(true)
+        {
+            controlObj.executeCustomMethods(*fillableSetup);
+        }
+    }
+}
+
+void runtime_Window::on_updatedMethodObject(methodSetup newSetup)
+{
+    *fillableSetup = newSetup;
 }

@@ -181,23 +181,18 @@ void NNConfigWindow::SendExecuteCommand(void)
         }
         else
         {
-
             if(manualMode)
             {
-
                 NNControlObj.RunNN(NNOutput,activationFunctionType,jsonChosenModel,
                                    manualInput1,manualInput2,manualMode);
             }
             else if(runType == 1)// || runType == 2)
             {
-                //NNControlObj.RunNNModbusOffline();
-
                 NNControlObj.RunNN(NNOutput,activationFunctionType,jsonChosenModel,
                                    manualInput1,manualInput2,false);
             }
             else
             {
-
                 (NNControlObj.RunNN(NNError,TargetOutput,NNOutput,learningrate,momentum,
                                     errorSmoothingRange,filename,activationFunctionType,
                                     true,trainingModelParameters.trainingModels,jsonChosenModel));
@@ -205,11 +200,7 @@ void NNConfigWindow::SendExecuteCommand(void)
                 ui->avgErrorLCD->display(NNError.back());
                 ui->NNPlotWidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
             }
-
-
         }
-
-
     }
     else
     {

@@ -25,8 +25,8 @@ customMethodConstructorWindow::customMethodConstructorWindow(QWidget *parent) :
     ui(new Ui::customMethodConstructorWindow)
 {
     ui->setupUi(this);
-    treeItemDelegate = new controlObjectItemDelegate(this);
-    ui->methodSetupTreeWidget->setItemDelegate(treeItemDelegate);
+    //treeItemDelegate = new controlObjectItemDelegate(this);
+    //ui->methodSetupTreeWidget->setItemDelegate(treeItemDelegate);
     ui->methodSetupTreeWidget->setColumnCount(5);
 
 
@@ -40,7 +40,7 @@ customMethodConstructorWindow::customMethodConstructorWindow(QWidget *parent) :
     setup.push_back(QString("Time Passed;Static Var;Tag Var").split(";"));
     setup.push_back(QString("Then;And;Or").split(";"));
 
-    reaction.push_back(QString("Action;Item;Static Var").split(";"));
+    reaction.push_back(QString("Log Current Data;Use PID Control;Engage Adaptive NN;Disengae Adaptive NN;Engage Predictive NN").split(";"));
     reaction.push_back(QString("End;Else").split(";"));
     reaction.push_back(QString("End;Break").split(";"));
 
@@ -337,13 +337,13 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         while (cycleSetup < cycleSize)
         {
 
-            if(cycleSetup == 0 && !isTop)
-            {
-                cycleSetup++;
-                methodBlockCount++;
-            }
-            else
-            {
+//            if(cycleSetup == 0 && !isTop)
+//            {
+//                cycleSetup++;
+//                methodBlockCount++;
+//            }
+//            else
+//            {
                 QComboBox *itemComboBox = new QComboBox;
                 itemComboBox->setProperty("rowType", rowType);//First row in a method
                 //itemComboBox->setProperty("row", itemParent->indexOfChild(childItem));
@@ -402,7 +402,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                     itemParent->addChild(childItem);
                     cycleSetup++;
                 }
-            }
+            //}
 
         }
     }
@@ -414,13 +414,13 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         timeLineEditLocation = 4;
         while (cycleSetup < cycleSize)
         {
-            if(cycleSetup == 0 && !isTop)
-            {
-                cycleSetup++;
-                methodBlockCount++;
-            }
-            else
-            {
+//            if(cycleSetup == 0 && !isTop)
+//            {
+//                cycleSetup++;
+//                methodBlockCount++;
+//            }
+//            else
+//            {
                 QComboBox *itemComboBox = new QComboBox;
                 itemComboBox->setProperty("rowType", rowType);//First row in a method
                 //itemComboBox->setProperty("row", itemParent->indexOfChild(childItem));
@@ -479,7 +479,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                     itemParent->addChild(childItem);
                     cycleSetup++;
                 }
-            }
+           // }
 
 
         }
@@ -492,13 +492,13 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         lineEditLocation = 2;
         while (cycleSetup < cycleSize)
         {
-            if(cycleSetup == 0 && !isTop)
-            {
-                cycleSetup++;
-                methodBlockCount++;
-            }
-            else
-            {
+//            if(cycleSetup == 0 && !isTop)
+//            {
+//                cycleSetup++;
+//                methodBlockCount++;
+//            }
+//            else
+//            {
                 QComboBox *itemComboBox = new QComboBox;
                 itemComboBox->setProperty("rowType", rowType);//First row in a method
                 //itemComboBox->setProperty("row", itemParent->indexOfChild(childItem));
@@ -561,7 +561,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                     itemParent->addChild(childItem);
                     cycleSetup++;
                 }
-            }
+            //}
 
         }
 
@@ -575,13 +575,13 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         lineEditLocation = 4;
         while (cycleSetup < cycleSize)
         {
-            if(cycleSetup == 0 && !isTop)
-            {
-                cycleSetup++;
-                methodBlockCount++;
-            }
-            else
-            {
+//            if(cycleSetup == 0 && !isTop)
+//            {
+//                cycleSetup++;
+//                methodBlockCount++;
+//            }
+//            else
+//            {
                 QComboBox *itemComboBox = new QComboBox;
                 itemComboBox->setProperty("rowType", rowType);//First row in a method
                 //itemComboBox->setProperty("row", itemParent->indexOfChild(childItem));
@@ -645,7 +645,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                     itemParent->addChild(childItem);
                     cycleSetup++;
                 }
-            }
+            //}
 
 
         }
@@ -658,13 +658,13 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         widgetParent->setColumnCount(cycleSize);
         while (cycleSetup < cycleSize)
         {
-            if(cycleSetup == 0 && !isTop)
-            {
-                cycleSetup++;
-                methodBlockCount++;
-            }
-            else
-            {
+//            if(cycleSetup == 0 && !isTop)
+//            {
+//                cycleSetup++;
+//                methodBlockCount++;
+//            }
+//            else
+//            {
                 QComboBox *itemComboBox = new QComboBox;
                 itemComboBox->setProperty("rowType", rowType);//First row in a method
                 //itemComboBox->setProperty("row", itemParent->indexOfChild(childItem));
@@ -697,7 +697,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                 methodBlockCount++;
             }
 
-        }
+        //}
     }
         break;
     case 7:
@@ -707,13 +707,13 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
         timeLineEditLocation = 4;
         while (cycleSetup < cycleSize)
         {
-            if(cycleSetup == 0 && !isTop)
-            {
-                cycleSetup++;
-                methodBlockCount++;
-            }
-            else
-            {
+//            if(cycleSetup == 0 && !isTop)
+//            {
+//                cycleSetup++;
+//                methodBlockCount++;
+//            }
+//            else
+//            {
                 QComboBox *itemComboBox = new QComboBox;
                 itemComboBox->setProperty("rowType", rowType);//First row in a method
                 //itemComboBox->setProperty("row", itemParent->indexOfChild(childItem));
@@ -769,7 +769,7 @@ void customMethodConstructorWindow::addChildRow(QTreeWidget *widgetParent, QTree
                     itemParent->addChild(childItem);
                     cycleSetup++;
                 }
-            }
+           // }
 
 
         }
@@ -868,81 +868,19 @@ void customMethodConstructorWindow::OnLogicSetupComboIndexChanged(const QString&
 
         unsigned int currentLayoutType = childItem->data(0,Qt::UserRole+3).toInt();
 
-        if(nCol == 0)
+        if(nCol == 2)
         {
-            return;
+            if(currentLayoutType == 3 || currentLayoutType == 5 || currentLayoutType == 6)
+            {
+                return;
+            }
         }
-        else
+        else if(nCol == 3 || nCol == 0)
         {
-            switch (currentLayoutType) {
-            case 0:
+            if(currentLayoutType != 3 && currentLayoutType != 5 && currentLayoutType != 6)
             {
-                if(nCol == 3)
-                {
-                    return;
-                }
-
+                return;
             }
-                break;
-            case 1:
-            {
-                if(nCol == 3)
-                {
-                    return;
-                }
-            }
-                break;
-            case 2:
-            {
-                if(nCol == 3)
-                {
-                    return;
-                }
-            }
-                break;
-            case 3:
-            {
-                if(nCol == 2)
-                {
-                    return;
-                }
-            }
-                break;
-            case 4:
-            {
-                if(nCol == 3)
-                {
-                    return;
-                }
-            }
-                break;
-            case 5:
-            {
-                if(nCol == 2)
-                {
-                    return;
-                }
-            }
-                break;
-            case 6:
-            {
-                if(nCol == 2)
-                {
-                    return;
-                }
-
-            }
-                break;
-            case 7:
-            {
-                if(nCol == 3)
-                {
-                    return;
-                }
-            }
-                break;
-            }
-
         }
 
         //note that the number of columns is offset by one with reference to the nCol      
@@ -1164,24 +1102,6 @@ void transitionUserSelection(methodSetup *updatingModel,int startingLayout,int u
     std::cout << " ________________________________________ \n" << "|Size diff is " << sizeDiff << "                        | \n"
               << "|Transitioning from layout " << startingLayout << " to layout " << updatedLayout << "| \n **************************************** \n";
 
-    /*
-     *
-     * If we are recreating a row and changing the layout it means that some information must be kept in the
-     * customObjectMethods struct but some must be either deleted or altered to match the format of the new layout
-     * ________________________________________________________________________________________
-    * | Layout Type |      Visual Representation(showing combobox item 0)       | Cycle Size |
-    * |_____________|___________________________________________________________|____________|
-    * |      0      |[If][Time Passed][Seconds][<][Static Var][Line Edit][Then] |      6     |
-    * |      1      |[If][Static Var][Line Edit][<][Time Passed][Seconds][Then] |      6     |
-    * |      2      |[If][Time Passed][Seconds][<] [Tag Var][Then]              |      5     |
-    * |      3      |[If][Tag Var][<][Time Passed][Seconds][Then]               |      5     |
-    * |      4      |[If][Static Var][Line Edit][<][Tag Var][Then]              |      5     |
-    * |      5      |[If][Tag Var][<][Static Var][Line Edit][Then]              |      5     |
-    * |      6      |[If][Tag Var][<][Tag Var][Then]                            |      4     |
-    * |      7      |[If][Tag Var][<][Time Passed][Seconds][Then]               |      5     |
-    * ****************************************************************************************
-    */
-
     switch(sizeDiff)
     {
         case -1:
@@ -1294,12 +1214,10 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedColumn == 1)
         {
             updatedLayout = 5;
-            //addChildRow(widgetParent,parentItem,false,5,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 2;
-            //addChildRow(widgetParent,parentItem,false,2,rootIndex,ifIndex);
         }
 
     }
@@ -1309,12 +1227,10 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedColumn == 1)
         {
             updatedLayout = 6;
-            //addChildRow(widgetParent,parentItem,false,6,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 4;
-            //addChildRow(widgetParent,parentItem,false,4,rootIndex,ifIndex);
         }
     }
         break;
@@ -1323,17 +1239,14 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedText == "Static Var" && selectedColumn == 4)
         {
             updatedLayout = 0;
-            //addChildRow(widgetParent,parentItem,false,0,rootIndex,ifIndex);
         }
         else if(selectedColumn == 1 && selectedText == "Static Var")
         {
             updatedLayout = 4;
-            //addChildRow(widgetParent,parentItem,false,4,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 6;
-            //addChildRow(widgetParent,parentItem,false,6,rootIndex,ifIndex);
         }
     }
         break;
@@ -1342,17 +1255,14 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedColumn == 3 && selectedText == "Static Var")
         {
             updatedLayout = 5;
-            //addChildRow(widgetParent,parentItem,false,1,rootIndex,ifIndex);
         }
         else if(selectedColumn == 1 && selectedText == "Static Var")
         {
             updatedLayout = 1;
-            //addChildRow(widgetParent,parentItem,false,5,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 6;
-            //addChildRow(widgetParent,parentItem,false,6,rootIndex,ifIndex);
         }
     }
         break;
@@ -1361,17 +1271,14 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedColumn == 4 && selectedText == "Time Passed")
         {
             updatedLayout = 1;
-            //addChildRow(widgetParent,parentItem,false,1,rootIndex,ifIndex);
         }
         else if(selectedColumn == 1 && selectedText == "Time Passed")
         {
             updatedLayout = 2;
-            //addChildRow(widgetParent,parentItem,false,2,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 6;
-            //addChildRow(widgetParent,parentItem,false,6,rootIndex,ifIndex);
         }
     }
         break;
@@ -1380,22 +1287,18 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedText == "Static Var")
         {
             updatedLayout = 0;
-            //addChildRow(widgetParent,parentItem,false,0,rootIndex,ifIndex);
         }
         else if(selectedText == "Time Passed" && selectedColumn == 1)
         {
             updatedLayout = 0;
-            //addChildRow(widgetParent,parentItem,false,0,rootIndex,ifIndex);
         }
         else if(selectedText == "Time Passed" && selectedColumn == 3)
         {
             updatedLayout = 7;
-            //addChildRow(widgetParent,parentItem,false,7,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 6;
-            //addChildRow(widgetParent,parentItem,false,6,rootIndex,ifIndex);
         }
     }
         break;
@@ -1404,22 +1307,18 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedColumn == 1 && selectedText == "Time Passed")
         {
             updatedLayout = 2;
-            //addChildRow(widgetParent,parentItem,false,2,rootIndex,ifIndex);
         }
         else if(selectedColumn == 1 && selectedText == "Static Var")
         {
             updatedLayout = 4;
-            //addChildRow(widgetParent,parentItem,false,4,rootIndex,ifIndex);
         }
         else if(selectedColumn == 3 && selectedText == "Static Var")
         {
             updatedLayout = 5;
-            //addChildRow(widgetParent,parentItem,false,5,rootIndex,ifIndex);
         }
         else
         {
             updatedLayout = 3;
-            //addChildRow(widgetParent,parentItem,false,3,rootIndex,ifIndex);
         }
     }
         break;
@@ -1428,12 +1327,10 @@ void customMethodConstructorWindow::updateLayout(unsigned currentLayout, unsigne
         if(selectedColumn == 3)
         {
             updatedLayout = 6;
-            //addChildRow(widgetParent,parentItem,false,6,rootIndex,ifIndex);
         }
         else if(selectedText == "Static Var")
         {
             updatedLayout = 1;
-            //addChildRow(widgetParent,parentItem,false,1,rootIndex,ifIndex);
         }
     }
         break;
@@ -1459,7 +1356,7 @@ int customMethodConstructorWindow::updateMethodModel(int cycleCount,QTreeWidgetI
     customObjectMethods.userSelection.clear();
     customObjectMethods.layoutType.clear();
 
-    for(int cycleChildren = 0; cycleChildren < cycleCount;cycleChildren++)//(parentItem->indexOfChild(childItem)+1);cycleChildren++)
+    for(int cycleChildren = 0; cycleChildren < cycleCount;cycleChildren++)
     {
         customObjectMethods.selectionType.resize(cycleChildren+1);
         customObjectMethods.userSelection.resize(cycleChildren+1);
@@ -1538,7 +1435,18 @@ int customMethodConstructorWindow::updateMethodModel(int cycleCount,QTreeWidgetI
 
 void customMethodConstructorWindow::on_addMethodBtn_clicked()
 {
+    QTreeWidgetItem *parentItem = ui->methodSetupTreeWidget->topLevelItem(0);
+    updateMethodModel(parentItem->childCount(),parentItem);
+
     ui->newMethodBtn->setEnabled(true);
 
     ui->addMethodBtn->setEnabled(true);
+}
+
+void customMethodConstructorWindow::on_confirmBtn_clicked()
+{
+    QTreeWidgetItem *parentItem = ui->methodSetupTreeWidget->topLevelItem(0);
+    updateMethodModel(parentItem->childCount(),parentItem);
+    emit updatedMethodObject(customObjectMethods);
+    close();
 }

@@ -26,6 +26,15 @@ struct Tag {
     vector<int> tagSlaveAddress;
 };
 
+struct methodSetup
+{
+    methodSetup() {}
+
+    std::vector<std::vector<double>> userSelection;
+    std::vector<std::vector<int>> selectionType; //this may not be needed as it could be implied from layout type
+    std::vector<int> layoutType;
+};
+
 class runtime_Window : public QMainWindow
 {
     Q_OBJECT
@@ -102,6 +111,10 @@ private slots:
     
     void on_linkNNBtn_clicked();
 
+    void on_engageDynamicMethodsChk_toggled(bool checked);
+
+    void on_updatedMethodObject(methodSetup newSetup);
+
 private:
     //Browser * m_model;
     void releaseTcpModbus();
@@ -130,5 +143,7 @@ private:
     vector<unsigned> savedTopology;
     int dbType;
     bool dbConvertOccurred;
+    methodSetup *fillableSetup = new methodSetup;
+    methodSetup otherTestSetup;
 };
 #endif // RUNTIME_WINDOW_H

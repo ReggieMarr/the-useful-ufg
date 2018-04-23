@@ -11,20 +11,12 @@
 #include <QtCore>
 #include <QtGui>
 #include <QTreeWidget>
-#include "controlobjectitemdelegate.h"
+//#include "controlobjectitemdelegate.h"
+#include "runtime_window.h"
 
 namespace Ui {
 class customMethodConstructorWindow;
 }
-
-struct methodSetup
-{
-    methodSetup() {}
-
-    std::vector<std::vector<double>> userSelection;
-    std::vector<std::vector<int>> selectionType; //this may not be needed as it could be implied from layout type
-    std::vector<int> layoutType;
-};
 
 class customMethodConstructorWindow : public QMainWindow
 {
@@ -45,9 +37,14 @@ private slots:
     void OnExecuteLogicComboIndexChanged(const QString& text);
     void on_addMethodBtn_clicked();
 
+    void on_confirmBtn_clicked();
+
+signals:
+    void updatedMethodObject(methodSetup newSetup);
+
 private:
     std::vector<QString> treeRootNames;
-    controlObjectItemDelegate *treeItemDelegate;
+    //controlObjectItemDelegate *treeItemDelegate;
     int childColumnOffset;
     bool methodHasIfChild;
     int methodIndex,loggedIfIndex;

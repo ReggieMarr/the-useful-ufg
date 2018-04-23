@@ -129,58 +129,21 @@ void dataLogDialogWindow::on_sourceTypeCombo_currentIndexChanged(int index)
 
 void dataLogDialogWindow::on_editDatabase_editingFinished()
 {
-//    char *Databasecstr = new char[(ui->editDatabase->text()).toStdString().length() + 1];
-//    strcpy(Databasecstr, (ui->editDatabase->text()).toStdString().c_str());
-
-//    addedSource.database = Databasecstr;
-
-//    // do stuff
-//    delete [] Databasecstr;
-
-//    addedSource.port = 5;
-//    QByteArray tempDatabase = (ui->editDatabase->text().toLocal8Bit());
     addedSource.database = (ui->editDatabase->text().toLocal8Bit());//tempDatabase.data();
-
 }
 
 void dataLogDialogWindow::on_editUsername_editingFinished()
 {
-//    char *Usernamecstr = new char[(ui->editUsername->text()).toStdString().length() + 1];
-//    strcpy(Usernamecstr, (ui->editUsername->text()).toStdString().c_str());
-
-//    addedSource.user = Usernamecstr;
-//    // do stuff
-//    delete [] Usernamecstr;
-
-//    QByteArray tempUsername = (ui->editUsername->text().toLocal8Bit());
     addedSource.user = (ui->editUsername->text().toLocal8Bit());//tempUsername.data();
 }
 
 void dataLogDialogWindow::on_editPassword_editingFinished()
 {
-//    char *Passwordcstr = new char[(ui->editPassword->text()).toStdString().length() + 1];
-//    strcpy(Passwordcstr, (ui->editPassword->text()).toStdString().c_str());
-
-//    addedSource.password = Passwordcstr;
-
-//    // do stuff
-//    delete [] Passwordcstr;
-
-//    QByteArray tempPassword = (ui->editPassword->text().toLocal8Bit());
     addedSource.password = (ui->editPassword->text().toLocal8Bit());//tempPassword.data();
 }
 
 void dataLogDialogWindow::on_editHostname_editingFinished()
 {
-//    char *Hostnamecstr = new char[(ui->editHostname->text()).toStdString().length() + 1];
-//    strcpy(Hostnamecstr, (ui->editHostname->text()).toStdString().c_str());
-
-//    addedSource.serverIP = Hostnamecstr;
-
-//    // do stuff
-//    delete [] Hostnamecstr;
-
-//    QByteArray tempHostname = (ui->editHostname->text().toLocal8Bit());
     addedSource.serverIP = (ui->editHostname->text().toLocal8Bit());//tempHostname.data();
 }
 

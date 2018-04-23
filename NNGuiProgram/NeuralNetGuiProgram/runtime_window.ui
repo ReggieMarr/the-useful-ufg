@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="supervisionTab">
        <attribute name="title">
@@ -121,7 +121,7 @@
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="engageDynamicMethodsChk">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
               <horstretch>0</horstretch>
@@ -129,15 +129,21 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Enable Control</string>
+             <string>Engage Dynamic Methods</string>
             </property>
             <property name="checkable">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
            <widget class="QPushButton" name="dynamicObjectSetupBtn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Setup Dynamic Method</string>
             </property>
@@ -165,24 +171,24 @@
           </property>
          </widget>
         </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="linkNNBtn">
+          <property name="text">
+           <string>Link NN to Tags</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0">
-         <widget class="QRadioButton" name="customNNRdBtn">
+         <widget class="QPushButton" name="customNNRdBtn">
           <property name="text">
            <string>Custom NN</string>
           </property>
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QRadioButton" name="sourceNNRdBtn">
+         <widget class="QPushButton" name="sourceNNRdBtn">
           <property name="text">
            <string>NN Model from source</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="linkNNBtn">
-          <property name="text">
-           <string>Link NN to Tags</string>
           </property>
          </widget>
         </item>
