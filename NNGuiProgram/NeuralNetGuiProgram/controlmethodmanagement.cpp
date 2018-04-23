@@ -150,7 +150,7 @@ void controlMethodManagement::executeCustomMethods(methodSetup methodsToRead)//T
             else
             {
                 executeMethod = currentBool;
-                ~firstStatment;
+                firstStatment = false;
             }
 
             lastBool = currentBool;
