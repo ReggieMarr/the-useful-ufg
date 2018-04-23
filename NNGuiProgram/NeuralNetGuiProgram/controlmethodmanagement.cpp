@@ -37,23 +37,6 @@ void controlMethodManagement::executeCustomMethods(methodSetup methodsToRead)//T
     {
         for(int cycleStatements = 0;cycleStatements < statementNum;cycleStatements++)
         {
-            /*
-             *
-             * If we are recreating a row and changing the layout it means that some information must be kept in the
-             * customObjectMethods struct but some must be either deleted or altered to match the format of the new layout
-             * ________________________________________________________________________________________
-            * | Layout Type |      Visual Representation(showing combobox item 0)       | Cycle Size |
-            * |_____________|___________________________________________________________|____________|
-            * |      0      |[If][Time Passed][Seconds][<][Static Var][Line Edit][Then] |      6     |
-            * |      1      |[If][Static Var][Line Edit][<][Time Passed][Seconds][Then] |      6     |
-            * |      2      |[If][Time Passed][Seconds][<] [Tag Var][Then]              |      5     |
-            * |      3      |[If][Tag Var][<][Time Passed][Seconds][Then]               |      5     |
-            * |      4      |[If][Static Var][Line Edit][<][Tag Var][Then]              |      5     |
-            * |      5      |[If][Tag Var][<][Static Var][Line Edit][Then]              |      5     |
-            * |      6      |[If][Tag Var][<][Tag Var][Then]                            |      4     |
-            * |      7      |[If][Tag Var][<][Time Passed][Seconds][Then]               |      5     |
-            * ****************************************************************************************
-            */
 
             switch(methodsToRead.layoutType.at(cycleStatements))
             {
@@ -116,7 +99,7 @@ void controlMethodManagement::executeCustomMethods(methodSetup methodsToRead)//T
             {
                 case 0:
                 {
-                    currentBool = (valueA > valueB) ? true : false;
+                    currentBool = (valueA < valueB) ? true : false;
                 }
                     break;
                 case 1:
@@ -131,7 +114,7 @@ void controlMethodManagement::executeCustomMethods(methodSetup methodsToRead)//T
                     break;
                 case 3:
                 {
-                    currentBool = (valueA < valueB) ? true : false;
+                    currentBool = (valueA > valueB) ? true : false;
                 }
                     break;
             }
@@ -152,7 +135,6 @@ void controlMethodManagement::executeCustomMethods(methodSetup methodsToRead)//T
                 executeMethod = currentBool;
                 firstStatment = false;
             }
-
             lastBool = currentBool;
         }
     }

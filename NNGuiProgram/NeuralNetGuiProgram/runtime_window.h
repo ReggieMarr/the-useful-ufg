@@ -12,6 +12,11 @@
 //#include <QSqlTableModel>
 #include "QListWidgetItem"
 #include "datalogdialogwindow.h"
+#include <thread>
+#include <atomic>
+#include <chrono>
+
+#define NUM_THREADS 5
 
 namespace Ui {
 class runtime_Window;
@@ -48,7 +53,11 @@ public:
     void deleteRow();
     void updateActions();
 
+    //void loopMethods(methodSetup currentSetup);
     sourceInformation dbInformation;
+    std::thread controlThreads[NUM_THREADS];
+
+
 public slots:
     void dbSourceConfigured(sourceInformation receivedSourceConfig);
 
@@ -144,6 +153,7 @@ private:
     int dbType;
     bool dbConvertOccurred;
     methodSetup *fillableSetup = new methodSetup;
+
     methodSetup otherTestSetup;
 };
 #endif // RUNTIME_WINDOW_H

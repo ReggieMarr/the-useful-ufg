@@ -8,7 +8,6 @@
 #define CONTROLMETHODMANAGEMENT_H
 #include "executeneuralnet.h"
 #include "runtime_window.h"
-#include "chrono"
 
 using namespace std;
 

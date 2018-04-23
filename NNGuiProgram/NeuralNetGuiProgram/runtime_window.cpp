@@ -25,9 +25,11 @@
 #include "nntotagslinkagewindow.h"
 #include "controlmethodmanagement.h"
 
+
 const int DataTypeColumn = 0;
 const int AddrColumn = 1;
 const int DataColumn = 2;
+std::atomic_bool run;
 
 void runtime_Window::updateCombobox(int listIndex)
 {
@@ -149,6 +151,12 @@ runtime_Window::runtime_Window(QWidget *parent) :
 
 runtime_Window::~runtime_Window()
 {
+    if(controlThreads[0].joinable())
+    {
+        run = false;
+        controlThreads[0].join();
+    }
+
     delete ui;
 }
 
@@ -1614,16 +1622,34 @@ void runtime_Window::on_linkNNBtn_clicked()
     newLinkWindow->show();
 }
 
+void loopMethods(methodSetup currentSetup)
+{
+    //this and the this_thread::sleep_for is used to reduce CPU % usage
+    //at 200 there is no recognizable load on the CPU, likely possible to reduce this greatly
+    using namespace std::literals::chrono_literals;
+
+    controlMethodManagement controlObj;
+    while(run)
+    {
+        controlObj.executeCustomMethods(currentSetup);
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+}
 
 void runtime_Window::on_engageDynamicMethodsChk_toggled(bool checked)
 {
+    //this allows us to call the loop function which itself calls the control methods in a while loop
+    //we use the atomic boolean to start and stop the function in the thread and then the join() to allow the thread
+    //to run to completion
     if(checked && fillableSetup)
     {
-        controlMethodManagement controlObj;
-        while(true)
-        {
-            controlObj.executeCustomMethods(*fillableSetup);
-        }
+        run = true;
+        controlThreads[0] = std::thread(loopMethods,*fillableSetup);
+    }
+    else if(!checked)
+    {
+        run = false;
+        controlThreads[0].join();
     }
 }
 
