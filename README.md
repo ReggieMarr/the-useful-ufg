@@ -1,18 +1,29 @@
 # the-useful-ufg
- This is a program I put together for a school project, now trying to put it out there for people to use and/or play with.
- 
-Essentially its a Neural Network C++ program made primarily from a fellow named David Miller's online tutorial in a Qt Gui Enviroment, and is able to generate a model given a series of inputs and expected outputs.
- 
-This is very much so a beta version and currently from just interacting with the Gui all it can do is make a mySQL connection and produce a model in the form of a json file based off a txt file training set.
+The Useful UFG (universal function generator) was initially conceived as a tool that would be developed as part of a self-learning exercise to gain a deeper understanding of machine learning and its relevant applications to process and manufacturing. This was done under Dr. Tom Wanyama as part of the masters level course ProcTech6AS3.
 
+## Summary
+This program is meant to serve as an application which allows for easy integration of machine learning algorithms into a variety of engineering systems (manufacturing, chemical process, embedded, ect). 
+
+It contains a neural network classes which allows for deep learning and can communicate to control systems via modbus standard protocol. (I2C and UART capability soon to come).
+
+The user is then able to set up control methods using the dynamic method creator, save these methods (and associated machine learning models) and connect to systems for real time supervision and control.
+
+Additionally the application allows the user to set up data logging either via a direct connection to a MySQL database or by creating local data logging files.
+
+## Open source resources used
+
+### Qt Creator
+### libmodbus
+### MySQL C API
+
+***Additionally while the Neural Network functionality was developed by myself it did draw inspiration from [David Miller's Tutorial Video](https://vimeo.com/19569529).
+
+
+## Default Training Set Format
 The training set must be in the format of the following:
 
   topology: inputlayer hiddenlayer1 outputlayer
   
   in: data1 data2 data3 ect..
   
-  out: expectedoutput1 expectedoutput2 expectedoutput3 ect..
-  
-  I am working to put this together and give credits where neccesary and figure out licensing ASAP so for all those who put together some of the libraries I am using and dont see proper credit where due please wait ! Or message me, I am still trying to figure this all out.
-  
-  Thank you !! 
+  out: expectedoutput1 expectedoutput2 expectedoutput3
